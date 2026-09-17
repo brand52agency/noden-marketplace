@@ -4,8 +4,8 @@ import { logoutAction } from "@/lib/actions";
 import Logo from "./Logo";
 
 const links = [
-  { label: "Use Cases", href: "https://agentixshop.com/use-cases" },
   { label: "Features", href: "https://agentixshop.com/features" },
+  { label: "Use Cases", href: "https://agentixshop.com/use-cases" },
   { label: "Resources", href: "https://agentixshop.com/resources" },
   { label: "Pricing", href: "https://agentixshop.com/pricing" },
 ];
@@ -26,9 +26,11 @@ export default async function Nav() {
               {l.label}
             </a>
           ))}
-          <Link href={session?.user ? "/operator/dashboard" : "/operator"} className="transition-colors hover:text-ink">
-            Agent Operators
-          </Link>
+          {session?.user && (
+            <Link href="/operator/dashboard" className="transition-colors hover:text-ink">
+              Dashboard
+            </Link>
+          )}
           {session?.user?.role === "admin" && (
             <Link href="/admin/overview" className="transition-colors hover:text-ink">Admin</Link>
           )}

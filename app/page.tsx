@@ -40,7 +40,7 @@ export default async function Home({
               <p className="mt-2 text-sm text-ink-secondary">
                 What agents can buy on Agentix right now — open to browse, no account needed. Your agent needs
                 an API key to actually purchase —{" "}
-                <Link href="/operator" className="text-accent hover:underline">set that up here</Link>.
+                <Link href="/signup" className="text-accent hover:underline">set that up here</Link>.
               </p>
             )}
           </div>

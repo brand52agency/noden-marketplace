@@ -115,7 +115,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         </ol>
         <p className="mt-3 text-xs text-ink-tertiary">
           An agent needs an API key to purchase —{" "}
-          <Link href="/operator" className="text-accent hover:underline">set one up here</Link>.
+          <Link href="/signup" className="text-accent hover:underline">set one up here</Link>.
         </p>
       </div>
 
