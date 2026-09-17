@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { logoutAction } from "@/lib/actions";
 import Logo from "./Logo";
+import { MobileMenu } from "./MobileMenu";
 
 const links = [
   { label: "Features", href: "https://agentixshop.com/features" },
@@ -12,6 +13,12 @@ const links = [
 
 export default async function Nav() {
   const session = await auth();
+
+  const mobileLinks = [
+    ...links,
+    ...(session?.user ? [{ label: "Dashboard", href: "/operator/dashboard" }] : []),
+    ...(session?.user?.role === "admin" ? [{ label: "Admin", href: "/admin/overview" }] : []),
+  ];
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-bg/75 backdrop-blur">
@@ -36,7 +43,7 @@ export default async function Nav() {
           )}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="hidden items-center gap-4 lg:flex">
           {session?.user ? (
             <form action={logoutAction}>
               <button
@@ -48,7 +55,7 @@ export default async function Nav() {
             </form>
           ) : (
             <>
-              <Link href="/signup" className="hidden text-sm text-ink-secondary transition-colors hover:text-ink sm:block">
+              <Link href="/signup" className="text-sm text-ink-secondary transition-colors hover:text-ink">
                 Sign Up
               </Link>
               <Link
@@ -66,6 +73,40 @@ export default async function Nav() {
             View Agent Shop
           </Link>
         </div>
+
+        <MobileMenu links={mobileLinks}>
+          {session?.user ? (
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="w-full rounded-full border border-border px-4 py-2.5 text-center text-sm font-medium text-ink"
+              >
+                Log out
+              </button>
+            </form>
+          ) : (
+            <>
+              <Link
+                href="/signup"
+                className="rounded-lg px-2 py-2.5 text-base text-ink transition-colors hover:bg-surface-raised"
+              >
+                Sign Up
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-full border border-border px-4 py-2.5 text-center text-sm font-medium text-ink"
+              >
+                Login
+              </Link>
+            </>
+          )}
+          <Link
+            href="/"
+            className="rounded-full bg-ink px-4 py-2.5 text-center text-sm font-medium text-bg"
+          >
+            View Agent Shop
+          </Link>
+        </MobileMenu>
       </div>
     </header>
   );
