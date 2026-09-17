@@ -4,7 +4,6 @@ import { logoutAction } from "@/lib/actions";
 import Logo from "./Logo";
 
 const links = [
-  { label: "Home", href: "https://agentixshop.com" },
   { label: "Use Cases", href: "https://agentixshop.com/use-cases" },
   { label: "Features", href: "https://agentixshop.com/features" },
   { label: "Resources", href: "https://agentixshop.com/resources" },
@@ -17,9 +16,9 @@ export default async function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-bg/75 backdrop-blur">
       <div className="mx-auto flex max-w-[1228px] items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center">
+        <a href="https://agentixshop.com" className="flex items-center">
           <Logo height={32} />
-        </Link>
+        </a>
 
         <nav className="hidden items-center gap-6 text-[14px] text-ink-secondary lg:flex">
           {links.map((l) => (
