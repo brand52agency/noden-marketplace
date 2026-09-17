@@ -6,7 +6,7 @@
 // Postgres; see lib/search.ts for how semantic search degrades to
 // keyword/category search without it.
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
