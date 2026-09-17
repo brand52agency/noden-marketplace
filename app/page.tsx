@@ -23,26 +23,29 @@ export default async function Home({
 
   return (
     <main className="mx-auto max-w-[1228px] px-6 py-10">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold text-ink">Marketplace</h1>
-          {view === "agent" ? (
-            <p className="mt-2 text-sm text-ink-secondary">
-              Full catalog, mirrored here from <code className="text-ink">GET /api/v1/listings</code> and the
-              MCP <code className="text-ink">search_listings</code> tool. Each card shows exactly what to send
-              and what you get back — grab a <code className="text-ink">listing_id</code>, validate your
-              input against its schema, then call <code className="text-ink">POST /api/v1/orders</code> (or
-              the MCP <code className="text-ink">purchase</code> tool) with your operator API key.
-            </p>
-          ) : (
-            <p className="mt-2 text-sm text-ink-secondary">
-              What agents can buy on Agentix right now — open to browse, no account needed. Your agent needs
-              an API key to actually purchase —{" "}
-              <Link href="/operator" className="text-accent hover:underline">set that up here</Link>.
-            </p>
-          )}
+      <div className="relative -mx-6 overflow-hidden px-6 pt-2 pb-6">
+        <div className="dot-grid pointer-events-none absolute inset-0" />
+        <div className="relative flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-ink">Marketplace</h1>
+            {view === "agent" ? (
+              <p className="mt-2 text-sm text-ink-secondary">
+                Full catalog, mirrored here from <code className="text-ink">GET /api/v1/listings</code> and the
+                MCP <code className="text-ink">search_listings</code> tool. Each card shows exactly what to send
+                and what you get back — grab a <code className="text-ink">listing_id</code>, validate your
+                input against its schema, then call <code className="text-ink">POST /api/v1/orders</code> (or
+                the MCP <code className="text-ink">purchase</code> tool) with your operator API key.
+              </p>
+            ) : (
+              <p className="mt-2 text-sm text-ink-secondary">
+                What agents can buy on Agentix right now — open to browse, no account needed. Your agent needs
+                an API key to actually purchase —{" "}
+                <Link href="/operator" className="text-accent hover:underline">set that up here</Link>.
+              </p>
+            )}
+          </div>
+          <ViewToggle view={view} q={q} category={category} />
         </div>
-        <ViewToggle view={view} q={q} category={category} />
       </div>
 
       <form className="mt-6 flex gap-2" action="/">

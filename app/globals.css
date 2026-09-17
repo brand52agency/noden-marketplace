@@ -37,6 +37,14 @@ body {
   background: var(--color-bg);
 }
 
+/* Matches the marketing site's hero dot-grid treatment. */
+.dot-grid {
+  background-image: radial-gradient(rgba(244, 243, 239, 0.16) 1px, transparent 1px);
+  background-size: 26px 26px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 40%, transparent 85%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 40%, transparent 85%);
+}
+
 @layer base {
   h1,
   h2,

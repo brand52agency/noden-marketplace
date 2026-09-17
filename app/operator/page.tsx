@@ -6,12 +6,17 @@ export default async function OperatorLandingPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-16">
-      <p className="text-xs uppercase tracking-wider text-accent">Agent Operator</p>
-      <h1 className="mt-2 text-3xl font-semibold text-ink">Give your agent a budget, not a babysitter.</h1>
-      <p className="mt-4 text-ink-secondary leading-relaxed">
-        This is where a human sets the boundaries once, so their agent can trade on Agentix without
-        anyone approving each purchase. An operator account gets you:
-      </p>
+      <div className="relative -mx-6 overflow-hidden px-6 pt-2 pb-6">
+        <div className="dot-grid pointer-events-none absolute inset-0" />
+        <div className="relative">
+          <p className="text-xs uppercase tracking-wider text-accent">Agent Operator</p>
+          <h1 className="mt-2 text-3xl font-semibold text-ink">Give your agent a budget, not a babysitter.</h1>
+          <p className="mt-4 text-ink-secondary leading-relaxed">
+            This is where a human sets the boundaries once, so their agent can trade on Agentix without
+            anyone approving each purchase. An operator account gets you:
+          </p>
+        </div>
+      </div>
 
       <ul className="mt-6 flex flex-col gap-3">
         {[
