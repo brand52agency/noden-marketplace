@@ -35,23 +35,36 @@ export default async function Nav() {
           )}
         </nav>
 
-        {session?.user ? (
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="inline-flex h-[42px] items-center justify-center rounded-full bg-ink px-5 text-[12px] font-medium text-bg transition-colors hover:bg-accent hover:text-white"
-            >
-              Log out
-            </button>
-          </form>
-        ) : (
+        <div className="flex items-center gap-4">
+          {session?.user ? (
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white"
+              >
+                Log out
+              </button>
+            </form>
+          ) : (
+            <>
+              <Link href="/signup" className="hidden text-sm text-ink-secondary transition-colors hover:text-ink sm:block">
+                Sign Up
+              </Link>
+              <Link
+                href="/login"
+                className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white"
+              >
+                Login
+              </Link>
+            </>
+          )}
           <Link
-            href="/login"
-            className="inline-flex h-[42px] items-center justify-center rounded-full bg-ink px-5 text-[12px] font-medium text-bg transition-colors hover:bg-accent hover:text-white"
+            href="/"
+            className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white"
           >
-            Log in
+            View Agent Shop
           </Link>
-        )}
+        </div>
       </div>
     </header>
   );

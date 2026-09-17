@@ -33,10 +33,6 @@
   --radius-lg: 16px;
 }
 
-html {
-  font-size: 14px;
-}
-
 body {
   background: var(--color-bg);
 }
