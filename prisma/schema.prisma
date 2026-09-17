@@ -1,0 +1,103 @@
+// Local dev uses SQLite for zero-setup persistence. Swap the
+// datasource below to Postgres (Neon / Vercel Postgres / Supabase, all
+// of which support the pgvector extension the build spec calls for)
+// when deploying — everything else in this schema is provider-agnostic.
+// The one exception is `Listing.embedding`, which only exists on
+// Postgres; see lib/search.ts for how semantic search degrades to
+// keyword/category search without it.
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Operator {
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  passwordHash       String
+  role               String   @default("buyer") // "buyer" | "seller" | "admin"
+  name               String?
+  nwcConnection      String? // reference string to their NWC-connected wallet (identity/reference only in v1 — see PaymentRail notes)
+  payoutLightningAddress String? // where payouts land when acting as a seller (user@domain LNURL-pay address)
+  allowAllSellers    Boolean  @default(true)
+  spendCapDailySats  Int      @default(0)
+  spendUsedTodaySats Int      @default(0)
+  spendResetAt       DateTime @default(now())
+  apiKey             String   @unique
+  createdAt          DateTime @default(now())
+
+  allowlist SellerAllowlistEntry[]
+  listings  Listing[]
+  orders    Order[]        @relation("BuyerOrders")
+  sales     Order[]        @relation("SellerOrders")
+  auditLog  AuditLogEntry[]
+}
+
+model SellerAllowlistEntry {
+  id         String   @id @default(cuid())
+  operatorId String
+  sellerId   String
+  operator   Operator @relation(fields: [operatorId], references: [id])
+
+  @@unique([operatorId, sellerId])
+}
+
+model Listing {
+  id           String   @id @default(cuid())
+  sellerId     String
+  seller       Operator @relation(fields: [sellerId], references: [id])
+  name         String
+  category     String
+  description  String
+  details      String? // longer "what it does and how it helps" copy, shown on the listing detail page
+  inputSchema  Json
+  outputSchema Json
+  priceSats    Int
+  active       Boolean  @default(true)
+  successRate  Float    @default(1.0)
+  avgLatencyMs Int      @default(0)
+  reputation   Float    @default(5.0)
+  createdAt    DateTime @default(now())
+
+  orders Order[]
+}
+
+model Order {
+  id                 String    @id @default(cuid())
+  buyerId            String
+  buyer              Operator  @relation("BuyerOrders", fields: [buyerId], references: [id])
+  sellerId           String
+  seller             Operator  @relation("SellerOrders", fields: [sellerId], references: [id])
+  listingId          String
+  listing            Listing   @relation(fields: [listingId], references: [id])
+  input              Json
+  amountSats         Int
+  railInvoiceRef     String // bolt11 payment_request string
+  railPaymentHash    String    @unique // LNbits payment hash, used to poll/webhook status
+  status             String // "pending_payment" | "paid" | "delivered" | "verified" | "disputed" | "refunded" | "settled"
+  output             Json?
+  verificationResult String? // "pass" | "fail"
+  failureNote        String?
+  platformFeeSats    Int? // Agentix's cut, set when the order settles — see lib/fees.ts
+  createdAt          DateTime  @default(now())
+  paidAt             DateTime?
+  settledAt          DateTime?
+}
+
+model AuditLogEntry {
+  id         String   @id @default(cuid())
+  operatorId String
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  action     String // "search" | "purchase" | "verification" | "dispute" | "payout"
+  detail     Json
+  createdAt  DateTime @default(now())
+}
+
+model InsightsCache {
+  id          String   @id @default("singleton")
+  content     String
+  generatedAt DateTime @default(now())
+}

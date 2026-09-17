@@ -1,26 +1,74 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* Matches agentixshop.com's design tokens so the app and marketing site
+     read as one product: dark surface, coral/orange accent, serif display
+     headings over an Inter body/UI face. */
+  --color-bg: #08080a;
+  --color-surface: #101013;
+  --color-surface-raised: #17171b;
+  --color-border: #232328;
+
+  --color-ink: #f4f3ef;
+  --color-ink-secondary: #97979f;
+  --color-ink-tertiary: #6b6b72;
+
+  --color-accent: #ee6833;
+  --color-accent-ink: #ffffff;
+  --color-accent-dim: rgba(238, 104, 51, 0.14);
+
+  --color-success: #34d399;
+  --color-success-bg: rgba(52, 211, 153, 0.12);
+  --color-fail: #f87171;
+  --color-fail-bg: rgba(248, 113, 113, 0.12);
+
+  /* Base UI/body face. */
+  --font-sans: var(--font-inter), "Inter Placeholder", sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  /* Display/heading face — Fraunces, matching the marketing site's headlines. */
+  --font-serif: var(--font-fraunces), "Fraunces Fallback", Georgia, serif;
+
+  /* Marketing site's --agentix-radius-card is 16px — redefining Tailwind's
+     built-in rounded-lg so every existing card/input using it matches. */
+  --radius-lg: 16px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-size: 14px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+}
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-serif);
+    letter-spacing: -0.02em;
+  }
+
+  h2 {
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  p {
+    color: var(--color-ink-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+  }
+
+  nav {
+    font-size: 14px;
+  }
 }
