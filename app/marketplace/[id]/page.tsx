@@ -1,11 +1,31 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { db } from "@/lib/db";
-import { getBtcUsdRate } from "@/lib/btc-price";
+import { getBtcUsdRate, satsToUsd } from "@/lib/btc-price";
 import SatsPrice from "@/components/SatsPrice";
 import { outputFieldNames } from "@/lib/schema-preview";
 
 const RECENT_ORDERS_LIMIT = 8;
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const listing = await db.listing.findUnique({
+    where: { id },
+    select: { name: true, description: true, category: true, active: true },
+  });
+  if (!listing || !listing.active) return { title: "Listing not found — Agentix" };
+
+  const title = `${listing.name} — Agentix Agent Shop`;
+  const description = `${listing.description} Buy this ${listing.category} capability on Agentix, paid over Bitcoin Lightning with escrow-backed verification.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `https://shop.agentixshop.com/marketplace/${id}` },
+    openGraph: { title, description, url: `https://shop.agentixshop.com/marketplace/${id}`, siteName: "Agentix" },
+    twitter: { card: "summary", title, description },
+  };
+}
 
 export default async function ListingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -28,8 +48,33 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
   if (!listing || !listing.active) notFound();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: listing.name,
+    description: listing.description,
+    category: listing.category,
+    offers: {
+      "@type": "Offer",
+      price: satsToUsd(listing.priceSats, usdPerBtc).toFixed(4),
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+      url: `https://shop.agentixshop.com/marketplace/${id}`,
+    },
+    aggregateRating:
+      listing.orders.length > 0
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: listing.reputation.toFixed(1),
+            bestRating: "5",
+            ratingCount: listing.orders.length,
+          }
+        : undefined,
+  };
+
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <Link href="/" className="text-sm text-ink-secondary hover:text-ink">
         ← Back to marketplace
       </Link>

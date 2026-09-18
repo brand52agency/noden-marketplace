@@ -26,7 +26,12 @@ function isNewUtcDay(spendResetAt: Date): boolean {
 
 export async function getOperatorByApiKey(apiKey: string) {
   const operator = await db.operator.findUnique({ where: { apiKey } });
-  if (!operator) throw new MarketplaceError("invalid API key", 401);
+  if (!operator) {
+    throw new MarketplaceError(
+      "invalid API key — you don't have access yet. Ask your operator to sign up at https://shop.agentixshop.com/signup and give you a valid key.",
+      401
+    );
+  }
 
   if (isNewUtcDay(operator.spendResetAt)) {
     return db.operator.update({
@@ -50,12 +55,18 @@ export async function createOrder(apiKey: string, listingId: string, input: Reco
       where: { operatorId_sellerId: { operatorId: operator.id, sellerId: listing.sellerId } },
     });
     if (!allowed) {
-      throw new MarketplaceError("this seller is not on your allowlist", 403);
+      throw new MarketplaceError(
+        "you don't have access to this seller yet — ask your operator to add it to your allowlist (or enable allowAllSellers) at https://shop.agentixshop.com/operator/setup",
+        403
+      );
     }
   }
 
   if (operator.spendCapDailySats <= 0) {
-    throw new MarketplaceError("spend cap is not set — configure one at /operator/setup", 403);
+    throw new MarketplaceError(
+      "you don't have access yet — no spend cap is set. Ask your operator to configure one at https://shop.agentixshop.com/operator/setup",
+      403
+    );
   }
   if (operator.spendUsedTodaySats + listing.priceSats > operator.spendCapDailySats) {
     throw new MarketplaceError(

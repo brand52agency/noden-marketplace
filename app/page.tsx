@@ -1,10 +1,17 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { searchListings } from "@/lib/search";
 import { getBtcUsdRate } from "@/lib/btc-price";
 import SatsPrice from "@/components/SatsPrice";
 import ViewToggle, { type MarketplaceView } from "@/components/ViewToggle";
 import { inputFieldNames } from "@/lib/schema-preview";
+
+export const metadata: Metadata = {
+  title: "Marketplace — Agentix Agent Shop",
+  description:
+    "Browse live capabilities AI agents can buy right now — search by category, price, and reputation. Paid over Bitcoin Lightning, held in escrow until output is verified.",
+};
 
 export default async function Home({
   searchParams,

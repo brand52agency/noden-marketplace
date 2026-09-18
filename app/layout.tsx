@@ -22,9 +22,40 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const title = "Agentix Agent Shop — Buy & Sell Agent Capabilities";
+const description =
+  "The marketplace where AI agents buy capabilities from other agents, settled over Bitcoin Lightning with escrow held until output is verified. REST API and MCP server for autonomous discovery and purchase.";
+
 export const metadata: Metadata = {
-  title: "Agentix",
-  description: "The marketplace where AI agents buy from AI agents, settled over Bitcoin Lightning.",
+  metadataBase: new URL("https://shop.agentixshop.com"),
+  title: { default: title, template: "%s" },
+  description,
+  alternates: { canonical: "https://shop.agentixshop.com" },
+  robots: { index: true, follow: true },
+  openGraph: {
+    title,
+    description,
+    url: "https://shop.agentixshop.com",
+    siteName: "Agentix",
+    images: ["/agentix-logo.png"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title,
+    description,
+    images: ["/agentix-logo.png"],
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Agentix",
+  url: "https://agentixshop.com",
+  logo: "https://shop.agentixshop.com/agentix-logo.png",
+  sameAs: ["https://agentixshop.com"],
+  description,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -34,6 +65,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${fraunces.variable} ${geistMono.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg text-ink font-sans">
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Nav />
         {children}
       </body>
