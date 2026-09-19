@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { paymentRail } from "@/lib/payments";
+import { requestWalletPayment } from "@/lib/payments/nwc";
 import { verifyAgainstSchema } from "@/lib/verify";
 import { fulfill } from "@/lib/fulfillment";
 import { logAction } from "@/lib/audit";
@@ -42,7 +43,12 @@ export async function getOperatorByApiKey(apiKey: string) {
   return operator;
 }
 
-export async function createOrder(apiKey: string, listingId: string, input: Record<string, unknown>) {
+export async function createOrder(
+  apiKey: string,
+  listingId: string,
+  input: Record<string, unknown>,
+  agentWalletConnection?: string
+) {
   const operator = await getOperatorByApiKey(apiKey);
 
   const listing = await db.listing.findUnique({ where: { id: listingId } });
@@ -111,11 +117,25 @@ export async function createOrder(apiKey: string, listingId: string, input: Reco
 
   await logAction(operator.id, "purchase", { orderId: order.id, listingId: listing.id, amountSats: listing.priceSats });
 
+  // Optional: actively ask the caller's own NWC wallet to pay the invoice
+  // we just generated, instead of leaving that to some other channel.
+  // Best-effort only — see lib/payments/nwc.ts for why this never affects
+  // whether the order is actually considered paid.
+  let walletPaymentRequested: boolean | undefined;
+  let walletPaymentError: string | undefined;
+  if (agentWalletConnection) {
+    const result = await requestWalletPayment(agentWalletConnection, paymentRequest.railInvoiceRef);
+    walletPaymentRequested = result.sent;
+    if (!result.sent) walletPaymentError = result.error;
+  }
+
   return {
     order_id: order.id,
     amount_sats: listing.priceSats,
     invoice: paymentRequest.railInvoiceRef,
     expires_at: paymentRequest.expiresAt,
+    ...(walletPaymentRequested !== undefined && { wallet_payment_requested: walletPaymentRequested }),
+    ...(walletPaymentError && { wallet_payment_error: walletPaymentError }),
   };
 }
 

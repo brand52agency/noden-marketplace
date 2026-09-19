@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getBtcUsdRate, satsToUsd } from "@/lib/btc-price";
 import SatsPrice from "@/components/SatsPrice";
 import { outputFieldNames } from "@/lib/schema-preview";
+import { describeReputation, COMPLETED_ORDER_STATUSES } from "@/lib/reputation";
 
 const RECENT_ORDERS_LIMIT = 8;
 
@@ -36,17 +37,20 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       include: {
         seller: { select: { name: true, email: true, createdAt: true } },
         orders: {
-          where: { status: { in: ["settled", "disputed", "refunded"] } },
+          where: { status: { in: [...COMPLETED_ORDER_STATUSES] } },
           orderBy: { createdAt: "desc" },
           take: RECENT_ORDERS_LIMIT,
           select: { id: true, amountSats: true, status: true, createdAt: true },
         },
+        _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
       },
     }),
     getBtcUsdRate(),
   ]);
 
   if (!listing || !listing.active) notFound();
+
+  const rep = describeReputation(listing, listing._count.orders);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -62,12 +66,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       url: `https://shop.agentixshop.com/marketplace/${id}`,
     },
     aggregateRating:
-      listing.orders.length > 0
+      rep.reputation !== null
         ? {
             "@type": "AggregateRating",
-            ratingValue: listing.reputation.toFixed(1),
+            ratingValue: rep.reputation.toFixed(1),
             bestRating: "5",
-            ratingCount: listing.orders.length,
+            ratingCount: rep.verified_trades,
           }
         : undefined,
   };
@@ -101,11 +105,17 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       <dl className="mt-6 grid grid-cols-3 gap-4 rounded-lg bg-surface border border-border p-5 text-sm">
         <div>
           <dt className="text-xs text-ink-tertiary">Success rate</dt>
-          <dd className="mt-1 text-ink">{(listing.successRate * 100).toFixed(0)}%</dd>
+          <dd className="mt-1 text-ink">{rep.success_rate === null ? "—" : `${(rep.success_rate * 100).toFixed(0)}%`}</dd>
         </div>
         <div>
           <dt className="text-xs text-ink-tertiary">Reputation</dt>
-          <dd className="mt-1 text-ink">{listing.reputation.toFixed(1)} / 5</dd>
+          <dd className="mt-1 text-ink">
+            {rep.reputation === null ? (
+              <span className="text-ink-tertiary">Unrated — no trades yet</span>
+            ) : (
+              `${rep.reputation.toFixed(1)} / 5 (${rep.verified_trades} trade${rep.verified_trades === 1 ? "" : "s"})`
+            )}
+          </dd>
         </div>
         <div>
           <dt className="text-xs text-ink-tertiary">Avg latency</dt>
@@ -145,12 +155,12 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs text-ink-secondary">
           <li>
             Discover it via <code className="text-ink">GET /api/v1/listings</code> or the MCP{" "}
-            <code className="text-ink">search_listings</code> tool.
+            <code className="text-ink">search_skills</code> tool.
           </li>
           <li>
             Validate its own input against the input schema above, then call{" "}
             <code className="text-ink">POST /api/v1/orders</code> (or the MCP{" "}
-            <code className="text-ink">purchase</code> tool) with its operator API key.
+            <code className="text-ink">purchase_skill</code> tool) with its operator API key.
           </li>
           <li>Pay the returned Lightning invoice for {listing.priceSats.toLocaleString()} sats.</li>
           <li>

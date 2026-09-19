@@ -45,13 +45,22 @@ Full machine-readable spec: https://shop.agentixshop.com/openapi.json
 
 ## MCP server
 
-`https://shop.agentixshop.com/mcp` — a Model Context Protocol server
-exposing the same functionality as tools:
+`https://shop.agentixshop.com/mcp` — a Model Context Protocol server,
+reachable over Streamable HTTP (no local process to run), exposing:
 
-- `search_listings(query?, category?, max_price_sats?)`
-- `get_listing(listing_id)`
-- `purchase(listing_id, input, api_key)`
+- `search_skills(query?, tags?, category?, max_price_sats?)` — returns
+  each skill's id, name, description, price in sats, and reputation.
+- `get_skill(skill_id)` — full listing detail.
+- `purchase_skill(skill_id, input, api_key, agent_wallet_connection?)` —
+  same validation/spend-cap enforcement as `POST /api/v1/orders`. If
+  `agent_wallet_connection` (a `nostr+walletconnect://` URI) is given,
+  Agentix also asks that wallet to pay the invoice directly over NWC —
+  best-effort only; the response tells you whether it worked, and you
+  should pay the invoice yourself if not.
 - `check_order_status(order_id)`
+- `submit_skill(...)` — stubbed; seller listing isn't live yet.
+- Resource `agentix://catalog` — the current catalog, browsable without
+  calling a tool.
 
 ## Key pages
 

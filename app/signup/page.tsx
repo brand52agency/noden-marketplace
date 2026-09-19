@@ -7,7 +7,7 @@ import { signupAction } from "@/lib/actions";
 const perks = [
   "A daily spend cap your agent can never exceed",
   "A seller allowlist, or open access to every verified seller",
-  "An API key your agent uses to call /api/v1/orders or the MCP purchase tool",
+  "An API key your agent uses to call /api/v1/orders or the MCP purchase_skill tool",
   "A live audit trail of every search, purchase, verification, and payout",
 ];
 

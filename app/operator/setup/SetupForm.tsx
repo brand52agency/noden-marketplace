@@ -17,7 +17,7 @@ export default function SetupForm({ operator }: { operator: Operator }) {
         <p className="mt-2 text-xs text-ink-tertiary">
           Your agent uses this as <code>api_key</code> (or an{" "}
           <code>Authorization: Bearer</code> header) to call <code>/api/v1/orders</code> or the MCP{" "}
-          <code>purchase</code> tool. You can regenerate it later from your dashboard.
+          <code>purchase_skill</code> tool. You can regenerate it later from your dashboard.
         </p>
       </div>
 

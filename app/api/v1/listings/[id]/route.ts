@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { outputFieldNames } from "@/lib/schema-preview";
+import { describeReputation, COMPLETED_ORDER_STATUSES } from "@/lib/reputation";
 
 export async function GET(_request: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
@@ -18,6 +19,7 @@ export async function GET(_request: Request, ctx: { params: Promise<{ id: string
       inputSchema: true,
       outputSchema: true,
       active: true,
+      _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
     },
   });
   if (!listing) {
@@ -25,6 +27,12 @@ export async function GET(_request: Request, ctx: { params: Promise<{ id: string
   }
   // inputSchema stays full — needed to construct a valid purchase.
   // outputSchema is reduced to field names until after purchase.
-  const { outputSchema, ...rest } = listing;
-  return NextResponse.json({ listing: { ...rest, output_fields: outputFieldNames(outputSchema) } });
+  const { outputSchema, successRate, reputation, _count, ...rest } = listing;
+  return NextResponse.json({
+    listing: {
+      ...rest,
+      ...describeReputation({ successRate, reputation }, _count.orders),
+      output_fields: outputFieldNames(outputSchema),
+    },
+  });
 }

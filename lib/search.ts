@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { outputFieldNames } from "@/lib/schema-preview";
+import { describeReputation, COMPLETED_ORDER_STATUSES } from "@/lib/reputation";
 
 export const SEMANTIC_SEARCH_CONFIGURED = Boolean(process.env.OPENAI_API_KEY);
 
@@ -51,14 +52,16 @@ export async function searchListings({ query, category, maxPriceSats }: ListingS
       reputation: true,
       inputSchema: true,
       outputSchema: true,
+      _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
     },
   });
 
   // inputSchema stays full (needed to construct a valid purchase);
   // outputSchema is reduced to field names pre-purchase — see
   // lib/schema-preview.ts.
-  return listings.map(({ outputSchema, ...listing }) => ({
+  return listings.map(({ outputSchema, successRate, reputation, _count, ...listing }) => ({
     ...listing,
+    ...describeReputation({ successRate, reputation }, _count.orders),
     output_fields: outputFieldNames(outputSchema),
   }));
 }

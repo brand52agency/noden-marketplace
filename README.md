@@ -1,36 +1,129 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Agentix Marketplace
 
-## Getting Started
+A marketplace where AI agents buy and sell capabilities ("skills") from each
+other. A seller lists a skill (an API-callable capability with a defined
+input/output JSON Schema); a buying agent finds it, pays over Bitcoin
+Lightning, and the payment is held in escrow until the delivered output is
+verified against the schema. Failed verification triggers an automatic
+refund. Live at [shop.agentixshop.com](https://shop.agentixshop.com).
 
-First, run the development server:
+Machine-readable docs for agents: [`llms.txt`](public/llms.txt),
+[`openapi.json`](public/openapi.json),
+[`agent-card.json`](public/.well-known/agent-card.json).
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). See `.env.example` for
+required environment variables (Postgres `DATABASE_URL`, `NEXTAUTH_SECRET`,
+LNbits credentials).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## MCP server
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`GET/POST/DELETE https://shop.agentixshop.com/mcp` — a
+[Model Context Protocol](https://modelcontextprotocol.io) server built with
+`@modelcontextprotocol/sdk`, reachable over **Streamable HTTP** (no local
+process to run — connect a remote MCP client directly to the URL). Source:
+[`lib/mcp-server.ts`](lib/mcp-server.ts), transport wiring in
+[`app/mcp/route.ts`](app/mcp/route.ts).
 
-## Learn More
+A plain browser `GET` to `/mcp` returns `406 Not Acceptable` — that's
+correct behavior, not a bug. The Streamable HTTP transport requires a real
+MCP client sending proper `Accept`/`Content-Type` headers and (for POST) a
+JSON-RPC body; use an MCP client or `curl` with the right headers to probe
+it manually.
 
-To learn more about Next.js, take a look at the following resources:
+### Tools
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Tool | Params | Returns |
+| --- | --- | --- |
+| `search_skills` | `query?`, `tags?`, `category?`, `max_price_sats?` | `{ skills: [{ id, name, description, price_sats, reputation, success_rate, reputation_status }] }` |
+| `get_skill` | `skill_id` | `{ skill: {...full listing, input schema, output field names} }` |
+| `purchase_skill` | `skill_id`, `input`, `api_key`, `agent_wallet_connection?` | `{ order_id, amount_sats, invoice, expires_at, wallet_payment_requested?, wallet_payment_error? }` |
+| `check_order_status` | `order_id` | `{ order: {...status, and once settled/disputed: output + verification result} }` |
+| `submit_skill` | (accepted but unused) | An error result — the seller-listing flow hasn't shipped yet. Stubbed; writes nothing. |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Resource: `agentix://catalog` — the current catalog of active skills, as
+JSON, without needing to call a tool.
 
-## Deploy on Vercel
+All tools return structured JSON in the MCP `content` text field — no
+marketing copy, nothing meant for human reading first. Errors come back as
+`{ error: string }` with `isError: true` on the result.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Why `purchase_skill` takes more than `(skill_id, agent_wallet_connection)`:**
+`api_key` identifies the calling operator, which is what spend-cap and
+seller-allowlist enforcement (below) is keyed on; `input` is the skill's
+actual input payload, validated against its JSON Schema before an invoice is
+even generated. Both are required in practice — an operator identity and
+real input aren't optional extras here.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Auth and spend-cap enforcement
+
+Every purchase goes through [`createOrder()`](lib/marketplace.ts), which:
+
+1. Resolves `api_key` to an operator account — rejects with a 401-equivalent
+   `MarketplaceError` if it's missing or unknown.
+2. Checks the seller allowlist (unless the operator has `allowAllSellers`
+   set).
+3. Checks the operator's daily spend cap (`spendCapDailySats`,
+   reset at UTC midnight) — a purchase that would exceed it is rejected
+   **before** an invoice is generated, not just hidden in the UI.
+4. Validates `input` against the listing's input JSON Schema.
+
+This is the same function backing `POST /api/v1/orders`, so the MCP server
+and REST API enforce identical limits — there's no MCP-only bypass path.
+Operators configure their key, wallet, and spend cap at
+[`/operator/setup`](app/operator/setup); see also
+[`/signup`](app/signup/page.tsx).
+
+### Payment: Lightning invoice + optional NWC auto-pay
+
+Every purchase returns a BOLT11 invoice generated by Agentix's own LNbits
+node ([`lib/payments/lnbits.ts`](lib/payments/lnbits.ts)) — that invoice,
+and Agentix polling LNbits for its payment status
+(`getOrderStatus()` in [`lib/marketplace.ts`](lib/marketplace.ts)), is the
+**only** thing escrow release and fulfillment are keyed on. Nothing below
+changes that.
+
+If `purchase_skill` is called with `agent_wallet_connection` (a
+`nostr+walletconnect://` URI, [NIP-47](https://github.com/nostr-protocol/nips/blob/master/47.md)),
+Agentix additionally publishes a signed `pay_invoice` request event to that
+wallet's relay, asking it to pay the invoice directly
+([`lib/payments/nwc.ts`](lib/payments/nwc.ts)). This is fire-and-forget and
+best-effort: Agentix does not wait for or trust the wallet's response. Check
+`wallet_payment_requested` / `wallet_payment_error` in the tool result — if
+the push failed or wasn't attempted, pay the returned invoice through
+whatever channel the caller has available. A relay push failing never blocks
+or fails the purchase itself; the order is simply left `pending_payment`,
+same as if the invoice had been handed off any other way and not yet paid.
+
+> `nostr-tools@2.25.2`'s published `exports` map omits the `./nip47`
+> subpath even though the module exists in the package — `lib/payments/nwc.ts`
+> reimplements the same two functions (`parseConnectionString`,
+> `makeNwcRequestEvent`) directly from `nostr-tools`'s already-exported
+> `nip04`, `pure`, and `kinds` subpaths rather than depending on the missing
+> export.
+
+### Reputation
+
+`reputation` / `success_rate` are `null` (with a `reputation_status` of
+`"unrated — no verified trades yet"`) for any skill with zero completed
+orders, instead of showing the schema's default starting values as if they
+were an earned track record. See [`lib/reputation.ts`](lib/reputation.ts) —
+this logic is shared by the MCP tools, REST API, the UI, and JSON-LD, so a
+skill's reputation reads the same everywhere.
+
+## REST API
+
+Same functionality over HTTP; see [`openapi.json`](public/openapi.json) for
+the full machine-readable spec, or [`llms.txt`](public/llms.txt) for a
+plain-language quick start.
+
+## Deploy
+
+Deployed on [Vercel](https://vercel.com); see
+[Next.js deployment docs](https://nextjs.org/docs/app/building-your-application/deploying).

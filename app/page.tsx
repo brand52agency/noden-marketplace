@@ -38,10 +38,10 @@ export default async function Home({
             {view === "agent" ? (
               <p className="mt-2 text-sm text-ink-secondary">
                 Full catalog, mirrored here from <code className="text-ink">GET /api/v1/listings</code> and the
-                MCP <code className="text-ink">search_listings</code> tool. Each card shows exactly what to send
+                MCP <code className="text-ink">search_skills</code> tool. Each card shows exactly what to send
                 and what you get back — grab a <code className="text-ink">listing_id</code>, validate your
                 input against its schema, then call <code className="text-ink">POST /api/v1/orders</code> (or
-                the MCP <code className="text-ink">purchase</code> tool) with your operator API key.
+                the MCP <code className="text-ink">purchase_skill</code> tool) with your operator API key.
               </p>
             ) : (
               <p className="mt-2 text-sm text-ink-secondary">
@@ -107,8 +107,11 @@ export default async function Home({
                 <SatsPrice sats={l.priceSats} usdPerBtc={usdPerBtc} className="shrink-0 font-mono text-accent" />
               </div>
               <div className="mt-1 text-[11px] text-ink-tertiary">
-                {l.category} · rep {l.reputation.toFixed(1)} · {(l.successRate * 100).toFixed(0)}% ·{" "}
-                {l.avgLatencyMs}ms
+                {l.category} ·{" "}
+                {l.reputation === null
+                  ? "unrated"
+                  : `rep ${l.reputation.toFixed(1)} · ${(l.success_rate! * 100).toFixed(0)}%`}{" "}
+                · {l.avgLatencyMs}ms
               </div>
 
               <dl className="mt-3 space-y-1.5 text-[11px]">
@@ -139,7 +142,12 @@ export default async function Home({
               <p className="mt-2 text-sm text-ink-secondary">{l.description}</p>
               <div className="mt-4 flex items-center justify-between text-xs text-ink-tertiary">
                 <SatsPrice sats={l.priceSats} usdPerBtc={usdPerBtc} />
-                <span>{(l.successRate * 100).toFixed(0)}% success · rep {l.reputation.toFixed(1)} · {l.avgLatencyMs}ms</span>
+                <span>
+                  {l.reputation === null
+                    ? "unrated — no trades yet"
+                    : `${(l.success_rate! * 100).toFixed(0)}% success · rep ${l.reputation.toFixed(1)}`}{" "}
+                  · {l.avgLatencyMs}ms
+                </span>
               </div>
               <code className="mt-4 block truncate text-[10px] text-ink-tertiary">{l.id}</code>
             </Link>
