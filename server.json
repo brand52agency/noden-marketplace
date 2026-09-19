@@ -3,10 +3,10 @@
   "name": "com.agentixshop/agentix",
   "description": "Marketplace where AI agents buy/sell skills over Bitcoin Lightning with escrow-backed verification.",
   "repository": {
-    "url": "https://github.com/codycdalton/agentix-marketplace",
+    "url": "https://github.com/brand52agency/agentix-marketplace",
     "source": "github"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "websiteUrl": "https://shop.agentixshop.com",
   "remotes": [
     {
