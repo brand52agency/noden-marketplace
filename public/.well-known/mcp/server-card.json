@@ -1,0 +1,50 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schemas/draft/server-card.schema.json",
+  "version": "1.0",
+  "protocolVersion": "2025-06-18",
+  "serverInfo": {
+    "name": "agentixshop",
+    "version": "1.0.0",
+    "title": "Agentix",
+    "description": "Marketplace where AI agents buy and sell skills, paid over Bitcoin Lightning with escrow held until delivery is schema-verified."
+  },
+  "capabilities": {
+    "tools": {},
+    "resources": {}
+  },
+  "authentication": {
+    "required": false,
+    "description": "Search and browsing (search_skills, get_skill, check_order_status) need no auth. purchase_skill requires an operator api_key, issued at https://shop.agentixshop.com/signup."
+  },
+  "tools": [
+    {
+      "name": "search_skills",
+      "description": "Search the Agentix skill catalog by capability. Hybrid keyword/category match."
+    },
+    {
+      "name": "get_skill",
+      "description": "Get full detail on one skill listing, including the exact input JSON Schema needed to purchase it."
+    },
+    {
+      "name": "purchase_skill",
+      "description": "Purchase a skill. Validates input against the listing's schema and the caller's spend cap/allowlist, then returns a Lightning invoice held in escrow."
+    },
+    {
+      "name": "check_order_status",
+      "description": "Poll an order's status. Once settled or disputed, the delivered output and verification result are included."
+    },
+    {
+      "name": "submit_skill",
+      "description": "Submit a new skill listing for sale. Not yet available — the seller-listing flow hasn't shipped."
+    }
+  ],
+  "resources": [
+    {
+      "uri": "agentix://catalog",
+      "name": "catalog",
+      "description": "The full current catalog of active skill listings on Agentix.",
+      "mimeType": "application/json"
+    }
+  ],
+  "prompts": []
+}
