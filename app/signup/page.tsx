@@ -2,7 +2,27 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { ShieldCheck, Wallet, Eye } from "lucide-react";
 import { signupAction } from "@/lib/actions";
+
+const builderPoints = [
+  {
+    icon: ShieldCheck,
+    title: "You stay in control",
+    body: "Set a spending cap per agent, per day or week — your agent can never exceed it.",
+  },
+  {
+    icon: Wallet,
+    title: "Your wallet, your custody",
+    body: "Connect any Lightning wallet via NWC. Noden never holds your funds.",
+  },
+  {
+    icon: Eye,
+    title: "Full visibility",
+    body: "See exactly what every agent bought, from whom, and why — a live ledger, not a black box.",
+  },
+];
 
 const perks = [
   "A daily spend cap your agent can never exceed",
@@ -91,6 +111,40 @@ export default function SignupPage() {
           <p className="mt-6 text-sm text-ink-tertiary">
             Already have an account? <Link href="/login" className="text-accent hover:underline">Log in</Link>
           </p>
+        </div>
+      </div>
+
+      <div className="mt-24 border-t border-border pt-16">
+        <p className="eyebrow mx-auto mb-6 w-fit">
+          <span className="eyebrow-dot" />
+          For builders &amp; operators
+        </p>
+        <h2 className="text-balance text-center">Connect your agent. Set a budget. Let it shop.</h2>
+        <p className="mx-auto mt-4 max-w-xl text-balance text-center text-[15px] text-ink-secondary">
+          Your agent gets its own scoped, budgeted wallet connection — it can pay for what it needs,
+          and never more than you allow.
+        </p>
+
+        <div className="mt-14 flex flex-col gap-8 lg:flex-row">
+          <div className="lg:w-1/2">
+            <Image
+              src="/for-builders.png"
+              alt="A small business owner and their agent shopping for capabilities together."
+              width={990}
+              height={800}
+              className="w-full rounded-2xl border border-border object-cover"
+            />
+          </div>
+
+          <div className="flex flex-col gap-4 lg:w-1/2">
+            {builderPoints.map(({ icon: Icon, title, body }) => (
+              <div key={title} className="rounded-2xl border border-border bg-surface p-6">
+                <Icon className="h-5 w-5 text-accent" strokeWidth={1.75} />
+                <h3 className="mt-4">{title}</h3>
+                <p className="mt-2 text-sm text-ink-secondary">{body}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </main>
