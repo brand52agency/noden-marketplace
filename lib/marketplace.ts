@@ -207,11 +207,7 @@ export async function getOrderStatus(orderId: string) {
 
   await logAction(order.buyerId, "dispute", { orderId: order.id, reason: verification.errors });
 
-  if (REFUND_GRACE_WINDOW_MINUTES <= 0) {
-    await refundOrder(order.id);
-  }
-
-  return db.order.update({
+  await db.order.update({
     where: { id: order.id },
     data: {
       status: "disputed",
@@ -220,6 +216,18 @@ export async function getOrderStatus(orderId: string) {
       failureNote: verification.errors,
       paidAt: new Date(),
     },
+  });
+
+  // refundOrder() sets status to "refunded" — that update must be the last
+  // word on this order, so return its result rather than re-fetching (a
+  // previous version unconditionally re-set status to "disputed" after
+  // this, silently clobbering a completed refund back to "disputed").
+  if (REFUND_GRACE_WINDOW_MINUTES <= 0) {
+    return refundOrder(order.id);
+  }
+
+  return db.order.findUniqueOrThrow({
+    where: { id: order.id },
     include: { listing: true, seller: true },
   });
 }
@@ -236,7 +244,11 @@ export async function refundOrder(orderId: string) {
     where: { id: order.buyerId },
     data: { spendUsedTodaySats: { decrement: order.amountSats } },
   });
-  return db.order.update({ where: { id: order.id }, data: { status: "refunded" } });
+  return db.order.update({
+    where: { id: order.id },
+    data: { status: "refunded" },
+    include: { listing: true, seller: true },
+  });
 }
 
 async function recalcReputation(listingId: string) {
