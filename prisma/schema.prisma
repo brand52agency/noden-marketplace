@@ -101,3 +101,17 @@ model InsightsCache {
   content     String
   generatedAt DateTime @default(now())
 }
+
+// Early-access signups from getnoden.com/earn, before seller listing
+// actually ships. Submitted cross-origin from the marketing site's own
+// form — see app/api/v1/seller-leads/route.ts for the CORS handling.
+model SellerLead {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  pitch     String? // what they'd want to list — optional, free text
+  source    String? // where the signup came from, e.g. "earn-page"
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
