@@ -14,6 +14,16 @@ function apiKey() {
   return `agx_${randomBytes(24).toString("hex")}`;
 }
 
+// Generates a fresh password per seed run instead of a fixed literal —
+// upsert's `update: {}` means this only ever applies to a genuinely new
+// account, but a fixed password checked into a public repo would still
+// double as a real login on any database the seed is later pointed at
+// (this bit a shared dev/prod database once already). Printed once at
+// the end of main() so a local run is still usable.
+function seedPassword() {
+  return randomBytes(9).toString("base64url");
+}
+
 function randomHash() {
   return randomBytes(16).toString("hex");
 }
@@ -1951,14 +1961,18 @@ const LISTINGS = [
 ];
 
 async function main() {
-  const adminPassword = await bcrypt.hash("admin12345", 10);
+  const adminIsNew = !(await db.operator.findUnique({ where: { email: "admin@agentixshop.dev" }, select: { id: true } }));
+  const adminPlaintext = seedPassword();
+  const adminPassword = await bcrypt.hash(adminPlaintext, 10);
   const admin = await db.operator.upsert({
     where: { email: "admin@agentixshop.dev" },
     update: {},
     create: { email: "admin@agentixshop.dev", passwordHash: adminPassword, role: "admin", apiKey: apiKey() },
   });
 
-  const sellerPassword = await bcrypt.hash("seller12345", 10);
+  const sellerIsNew = !(await db.operator.findUnique({ where: { email: "verified@agentixshop.dev" }, select: { id: true } }));
+  const sellerPlaintext = seedPassword();
+  const sellerPassword = await bcrypt.hash(sellerPlaintext, 10);
   const seller = await db.operator.upsert({
     where: { email: "verified@agentixshop.dev" },
     update: {},
@@ -1980,7 +1994,8 @@ async function main() {
     }
   }
 
-  const demoPassword = await bcrypt.hash("demo12345", 10);
+  const demoPlaintext = seedPassword();
+  const demoPassword = await bcrypt.hash(demoPlaintext, 10);
   const BUYER_ACCOUNTS = [
     { email: "demo-buyer@agentixshop.dev", spendCapDailySats: 5000 },
     { email: "acme-research@agentixshop.dev", spendCapDailySats: 3000 },
@@ -1988,7 +2003,10 @@ async function main() {
     { email: "lumen-support@agentixshop.dev", spendCapDailySats: 2000 },
   ];
   const buyers = [];
+  let anyBuyerIsNew = false;
   for (const b of BUYER_ACCOUNTS) {
+    const existing = await db.operator.findUnique({ where: { email: b.email }, select: { id: true } });
+    if (!existing) anyBuyerIsNew = true;
     const buyer = await db.operator.upsert({
       where: { email: b.email },
       update: {},
@@ -2115,6 +2133,17 @@ async function main() {
   console.log(
     `Seeded: admin=${admin.email}, seller=${seller.email} (${LISTINGS.length} listings), buyers=${buyers.length}, orders=${await db.order.count()}`
   );
+
+  // Generated passwords only apply to accounts created just now — an
+  // existing account's real password isn't touched by upsert's `update: {}`.
+  const newAccountLines: string[] = [];
+  if (adminIsNew) newAccountLines.push(`  ${admin.email}: ${adminPlaintext}`);
+  if (sellerIsNew) newAccountLines.push(`  ${seller.email}: ${sellerPlaintext}`);
+  if (anyBuyerIsNew) newAccountLines.push(...BUYER_ACCOUNTS.map((b) => `  ${b.email}: ${demoPlaintext}`));
+  if (newAccountLines.length > 0) {
+    console.log("\nGenerated passwords for newly-created accounts (save these, they won't be shown again):");
+    console.log(newAccountLines.join("\n"));
+  }
 }
 
 async function recalcAllReputations(listingIds: string[]) {
