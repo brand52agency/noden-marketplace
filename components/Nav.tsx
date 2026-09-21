@@ -7,6 +7,7 @@ import { MobileMenu } from "./MobileMenu";
 const links = [
   { label: "Features", href: "https://getnoden.com/features" },
   { label: "Use Cases", href: "https://getnoden.com/use-cases" },
+  { label: "Earn", href: "https://getnoden.com/earn" },
   { label: "Resources", href: "https://getnoden.com/resources" },
   { label: "Pricing", href: "https://getnoden.com/pricing" },
 ];
