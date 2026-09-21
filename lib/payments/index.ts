@@ -1,12 +1,12 @@
 import { lnbitsRail } from "./lnbits";
+import { albyRail } from "./alby";
 import { PaymentRail } from "./types";
 
-// Single config value controls which rail is active. Nothing outside
-// this folder should import lnbits.ts directly.
-const ACTIVE_PAYMENT_RAIL = "lightning-l402";
+const ACTIVE_PAYMENT_RAIL = "alby-nwc";
 
 const rails: Record<string, PaymentRail> = {
   "lightning-l402": lnbitsRail,
+  "alby-nwc": albyRail,
 };
 
 export const paymentRail: PaymentRail = rails[ACTIVE_PAYMENT_RAIL];
