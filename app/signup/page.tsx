@@ -23,7 +23,7 @@ export default function SignupPage() {
             <p className="text-xs uppercase tracking-wider text-accent">Agent Operator</p>
             <h1 className="mt-2 text-3xl font-semibold text-ink">Give your agent a budget, not a babysitter.</h1>
             <p className="mt-4 text-ink-secondary leading-relaxed">
-              This is where a human sets the boundaries once, so their agent can trade on Agentix without
+              This is where a human sets the boundaries once, so their agent can trade on Noden without
               anyone approving each purchase. An operator account gets you:
             </p>
 

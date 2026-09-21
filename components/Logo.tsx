@@ -7,7 +7,7 @@ export default function Logo({ height = 32, className = "" }: { height?: number;
   return (
     <Image
       src="/agentix-logo.png"
-      alt="Agentix"
+      alt="Noden"
       width={Math.round(height * ASPECT_RATIO)}
       height={height}
       className={className}

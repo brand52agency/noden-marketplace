@@ -29,7 +29,7 @@ export async function fulfill(
     model: "claude-opus-5",
     max_tokens: 2048,
     system: [
-      `You are the fulfillment engine behind the Agentix marketplace listing "${listing.name}".`,
+      `You are the fulfillment engine behind the Noden marketplace listing "${listing.name}".`,
       listing.details ?? listing.description,
       "Given the buyer's input below, actually perform this task using only the information provided — don't ask clarifying questions, don't return placeholder or example values, don't explain what you would do. Produce the real, finished result via the return_result tool.",
       "If the task nominally needs live external data you have no way to know (a real-time rate, a live availability check, a real carrier quote), give the most reasonable, well-reasoned estimate you can from the input and general knowledge rather than refusing — a paying buyer needs a concrete answer, not a caveat.",

@@ -15,15 +15,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     where: { id },
     select: { name: true, description: true, category: true, active: true },
   });
-  if (!listing || !listing.active) return { title: "Listing not found — Agentix" };
+  if (!listing || !listing.active) return { title: "Listing not found — Noden" };
 
-  const title = `${listing.name} — Agentix Agent Shop`;
-  const description = `${listing.description} Buy this ${listing.category} capability on Agentix, paid over Bitcoin Lightning with escrow-backed verification.`;
+  const title = `${listing.name} — Noden Agent Shop`;
+  const description = `${listing.description} Buy this ${listing.category} capability on Noden, paid over Bitcoin Lightning with escrow-backed verification.`;
   return {
     title,
     description,
-    alternates: { canonical: `https://shop.agentixshop.com/marketplace/${id}` },
-    openGraph: { title, description, url: `https://shop.agentixshop.com/marketplace/${id}`, siteName: "Agentix" },
+    alternates: { canonical: `https://shop.getnoden.com/marketplace/${id}` },
+    openGraph: { title, description, url: `https://shop.getnoden.com/marketplace/${id}`, siteName: "Noden" },
     twitter: { card: "summary", title, description },
   };
 }
@@ -63,7 +63,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
       price: satsToUsd(listing.priceSats, usdPerBtc).toFixed(4),
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",
-      url: `https://shop.agentixshop.com/marketplace/${id}`,
+      url: `https://shop.getnoden.com/marketplace/${id}`,
     },
     aggregateRating:
       rep.reputation !== null
@@ -125,8 +125,8 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
 
       <div className="mt-6 rounded-lg bg-surface border border-border p-5 text-sm">
         <p className="text-xs uppercase tracking-wider text-ink-tertiary">Seller</p>
-        <p className="mt-1 text-ink">{listing.seller.name ?? "Agentix Verified Seller"}</p>
-        <p className="text-xs text-ink-tertiary">Listing on Agentix since {listing.seller.createdAt.toLocaleDateString()}</p>
+        <p className="mt-1 text-ink">{listing.seller.name ?? "Noden Verified Seller"}</p>
+        <p className="text-xs text-ink-tertiary">Listing on Noden since {listing.seller.createdAt.toLocaleDateString()}</p>
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">

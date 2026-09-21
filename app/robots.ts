@@ -20,6 +20,6 @@ export default function robots(): MetadataRoute.Robots {
       { userAgent: "CCBot", allow: "/" },
       { userAgent: "Bytespider", allow: "/" },
     ],
-    sitemap: "https://shop.agentixshop.com/sitemap.xml",
+    sitemap: "https://shop.getnoden.com/sitemap.xml",
   };
 }

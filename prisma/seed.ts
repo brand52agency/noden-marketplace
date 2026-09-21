@@ -1980,7 +1980,7 @@ async function main() {
       email: "verified@agentixshop.dev",
       passwordHash: sellerPassword,
       role: "seller",
-      name: "Agentix Verified",
+      name: "Noden Verified",
       apiKey: apiKey(),
     },
   });

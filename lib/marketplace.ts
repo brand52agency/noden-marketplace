@@ -29,7 +29,7 @@ export async function getOperatorByApiKey(apiKey: string) {
   const operator = await db.operator.findUnique({ where: { apiKey } });
   if (!operator) {
     throw new MarketplaceError(
-      "invalid API key — you don't have access yet. Ask your operator to sign up at https://shop.agentixshop.com/signup and give you a valid key.",
+      "invalid API key — you don't have access yet. Ask your operator to sign up at https://shop.getnoden.com/signup and give you a valid key.",
       401
     );
   }
@@ -62,7 +62,7 @@ export async function createOrder(
     });
     if (!allowed) {
       throw new MarketplaceError(
-        "you don't have access to this seller yet — ask your operator to add it to your allowlist (or enable allowAllSellers) at https://shop.agentixshop.com/operator/setup",
+        "you don't have access to this seller yet — ask your operator to add it to your allowlist (or enable allowAllSellers) at https://shop.getnoden.com/operator/setup",
         403
       );
     }
@@ -70,7 +70,7 @@ export async function createOrder(
 
   if (operator.spendCapDailySats <= 0) {
     throw new MarketplaceError(
-      "you don't have access yet — no spend cap is set. Ask your operator to configure one at https://shop.agentixshop.com/operator/setup",
+      "you don't have access yet — no spend cap is set. Ask your operator to configure one at https://shop.getnoden.com/operator/setup",
       403
     );
   }
@@ -89,7 +89,7 @@ export async function createOrder(
   let paymentRequest;
   try {
     paymentRequest = await paymentRail.createPaymentRequest(listing.priceSats, {
-      memo: `Agentix: ${listing.name}`,
+      memo: `Noden: ${listing.name}`,
     });
   } catch (err) {
     throw new MarketplaceError(err instanceof Error ? err.message : "payment rail error", 503);
@@ -170,9 +170,9 @@ export async function getOrderStatus(orderId: string) {
 
   if (verification.valid) {
     const payoutDestination = order.seller.payoutLightningAddress ?? order.seller.nwcConnection;
-    // With no external payout destination — true today, since Agentix is the
+    // With no external payout destination — true today, since Noden is the
     // only seller and hasn't registered a payout address for itself — the
-    // full amount simply stays in Agentix's own LNbits wallet, so all of it
+    // full amount simply stays in Noden's own LNbits wallet, so all of it
     // is platform revenue. The 2.5% split only applies once there's an
     // actual third-party seller to pay the rest out to.
     let platformFeeSats = order.amountSats;

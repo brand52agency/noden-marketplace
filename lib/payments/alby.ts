@@ -2,7 +2,7 @@ import { PaymentRail, PaymentRequest, PaymentStatus } from "./types";
 import { looksLikeLightningAddress, resolveLightningAddress } from "./lnurl";
 import { callNwcMethod } from "./nwc-rpc";
 
-// Agentix's OWN wallet, connected via NWC (e.g. an Alby Hub "app
+// Noden's OWN wallet, connected via NWC (e.g. an Alby Hub "app
 // connection" string) rather than a hosted admin-key API like
 // LNbits/OpenNode. See nwc-rpc.ts for why this needs a full request/
 // response NWC client instead of the fire-and-forget push in nwc.ts.
@@ -45,7 +45,7 @@ export const albyRail: PaymentRail = {
 
   async createPaymentRequest(amountSats, metadata): Promise<PaymentRequest> {
     requireConfig();
-    const description = typeof metadata.memo === "string" ? metadata.memo : "Agentix order";
+    const description = typeof metadata.memo === "string" ? metadata.memo : "Noden order";
     const response = await callNwcMethod(ALBY_NWC_URL as string, "make_invoice", {
       amount: amountSats * 1000, // NWC amounts are millisats
       description,

@@ -1,29 +1,29 @@
 {
-  "name": "Agentix",
+  "name": "Noden",
   "description": "A marketplace where AI agents buy and sell capabilities (\"skills\") from each other, paid over Bitcoin Lightning with escrow held until the delivered output passes schema verification.",
-  "url": "https://shop.agentixshop.com",
+  "url": "https://shop.getnoden.com",
   "provider": {
-    "organization": "Agentix",
-    "url": "https://agentixshop.com"
+    "organization": "Noden",
+    "url": "https://getnoden.com"
   },
   "version": "1.0.0",
-  "documentationUrl": "https://shop.agentixshop.com/llms.txt",
+  "documentationUrl": "https://shop.getnoden.com/llms.txt",
   "interfaces": [
     {
       "type": "mcp",
       "transport": "streamable-http",
-      "url": "https://shop.agentixshop.com/mcp",
-      "description": "Model Context Protocol server exposing search_skills, get_skill, purchase_skill, check_order_status, and a submit_skill stub, plus an agentix://catalog resource."
+      "url": "https://shop.getnoden.com/mcp",
+      "description": "Model Context Protocol server exposing search_skills, get_skill, purchase_skill, check_order_status, and a submit_skill stub, plus a noden://catalog resource."
     },
     {
       "type": "openapi",
-      "url": "https://shop.agentixshop.com/openapi.json",
+      "url": "https://shop.getnoden.com/openapi.json",
       "description": "REST API covering the same functionality: GET /api/v1/listings, GET /api/v1/listings/{id}, POST /api/v1/orders, GET /api/v1/orders/{id}."
     }
   ],
   "authentication": {
     "schemes": ["bearer"],
-    "description": "Operator API key, issued at https://shop.agentixshop.com/signup. Required to purchase; search and browsing are public."
+    "description": "Operator API key, issued at https://shop.getnoden.com/signup. Required to purchase; search and browsing are public."
   },
   "payment": {
     "rails": ["bitcoin-lightning"],

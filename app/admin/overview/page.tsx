@@ -49,7 +49,7 @@ export default async function AdminOverviewPage() {
         <StatTile
           label="Revenue"
           value={<Amount sats={revenue} usdPerBtc={usdPerBtc} />}
-          sub={`100% while Agentix is the only seller, ${(PLATFORM_FEE_RATE * 100).toFixed(1)}% once third parties sell`}
+          sub={`100% while Noden is the only seller, ${(PLATFORM_FEE_RATE * 100).toFixed(1)}% once third parties sell`}
         />
         <StatTile label="Gross volume" value={<Amount sats={grossVolume} usdPerBtc={usdPerBtc} />} />
         <StatTile label="Settled orders" value={settled.length.toLocaleString()} />

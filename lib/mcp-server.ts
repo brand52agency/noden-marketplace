@@ -15,13 +15,13 @@ function errorText(message: string) {
 }
 
 export function createMcpServer() {
-  const server = new McpServer({ name: "agentixshop", version: "1.0.0" });
+  const server = new McpServer({ name: "noden", version: "1.0.0" });
 
   server.registerTool(
     "search_skills",
     {
       description:
-        "Search the Agentix skill catalog by capability. Hybrid keyword/category match (semantic search when configured). " +
+        "Search the Noden skill catalog by capability. Hybrid keyword/category match (semantic search when configured). " +
         "'tags' is folded into the same keyword search as 'query' — the catalog does not yet have a dedicated tags field.",
       inputSchema: {
         query: z.string().optional().describe("Free-text capability description, e.g. 'reviews contracts'"),
@@ -81,10 +81,10 @@ export function createMcpServer() {
         "'api_key' (your operator API key) and 'input' (the skill's required input, matching its input schema) " +
         "are required beyond the minimal skill_id/agent_wallet_connection shape, because spend-cap enforcement " +
         "needs to know which operator is calling and most skills need real input to run. " +
-        "If 'agent_wallet_connection' is given (a nostr+walletconnect:// URI), Agentix also asks that wallet to pay " +
+        "If 'agent_wallet_connection' is given (a nostr+walletconnect:// URI), Noden also asks that wallet to pay " +
         "the invoice directly via NWC — this is best-effort and fire-and-forget: check wallet_payment_requested/" +
         "wallet_payment_error in the response, and pay the returned invoice yourself if it's not true. Escrow release " +
-        "is always driven by Agentix detecting the payment on the invoice, never by the wallet-push call succeeding.",
+        "is always driven by Noden detecting the payment on the invoice, never by the wallet-push call succeeding.",
       inputSchema: {
         skill_id: z.string(),
         input: z.record(z.string(), z.unknown()).describe("Input matching the skill's input JSON Schema"),
@@ -92,7 +92,7 @@ export function createMcpServer() {
         agent_wallet_connection: z
           .string()
           .optional()
-          .describe("Optional nostr+walletconnect:// URI — if given, Agentix asks this wallet to pay the invoice"),
+          .describe("Optional nostr+walletconnect:// URI — if given, Noden asks this wallet to pay the invoice"),
       },
     },
     async ({ skill_id, input, api_key, agent_wallet_connection }) => {
@@ -128,7 +128,7 @@ export function createMcpServer() {
     "submit_skill",
     {
       description:
-        "Submit a new skill listing for sale. NOT YET AVAILABLE — the seller-listing flow isn't live on Agentix yet. " +
+        "Submit a new skill listing for sale. NOT YET AVAILABLE — the seller-listing flow isn't live on Noden yet. " +
         "Calling this returns a structured 'not available' response and writes nothing.",
       inputSchema: {
         name: z.string().optional(),
@@ -140,18 +140,18 @@ export function createMcpServer() {
     },
     async () => {
       return errorText(
-        "submit_skill is not available yet — the seller-listing flow hasn't shipped on Agentix. " +
-          "Check back later, or watch https://shop.agentixshop.com for seller onboarding."
+        "submit_skill is not available yet — the seller-listing flow hasn't shipped on Noden. " +
+          "Check back later, or watch https://shop.getnoden.com for seller onboarding."
       );
     }
   );
 
   server.registerResource(
     "catalog",
-    "agentix://catalog",
+    "noden://catalog",
     {
-      title: "Agentix skill catalog",
-      description: "The full current catalog of active skill listings on Agentix.",
+      title: "Noden skill catalog",
+      description: "The full current catalog of active skill listings on Noden.",
       mimeType: "application/json",
     },
     async (uri) => {

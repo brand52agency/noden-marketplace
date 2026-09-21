@@ -8,13 +8,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: "https://shop.agentixshop.com/", changeFrequency: "hourly", priority: 1 },
-    { url: "https://shop.agentixshop.com/signup", changeFrequency: "monthly", priority: 0.6 },
-    { url: "https://shop.agentixshop.com/login", changeFrequency: "yearly", priority: 0.2 },
+    { url: "https://shop.getnoden.com/", changeFrequency: "hourly", priority: 1 },
+    { url: "https://shop.getnoden.com/signup", changeFrequency: "monthly", priority: 0.6 },
+    { url: "https://shop.getnoden.com/login", changeFrequency: "yearly", priority: 0.2 },
   ];
 
   const listingRoutes: MetadataRoute.Sitemap = listings.map((listing) => ({
-    url: `https://shop.agentixshop.com/marketplace/${listing.id}`,
+    url: `https://shop.getnoden.com/marketplace/${listing.id}`,
     lastModified: listing.createdAt,
     changeFrequency: "daily",
     priority: 0.8,

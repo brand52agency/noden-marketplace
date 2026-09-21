@@ -64,7 +64,7 @@ export async function getInsights(forceRegenerate = false): Promise<{ content: s
     model: "claude-opus-5",
     max_tokens: 2000,
     system:
-      "You are a marketplace operations analyst for Agentix, a Bitcoin Lightning marketplace where AI agents buy capabilities from other agents. You're given the last 30 days of order data aggregated by category and seller. Give concrete, numbered, actionable recommendations — cite the actual numbers you were given. If the data is too sparse to say anything meaningful, say so plainly instead of inventing patterns.",
+      "You are a marketplace operations analyst for Noden, a Bitcoin Lightning marketplace where AI agents buy capabilities from other agents. You're given the last 30 days of order data aggregated by category and seller. Give concrete, numbered, actionable recommendations — cite the actual numbers you were given. If the data is too sparse to say anything meaningful, say so plainly instead of inventing patterns.",
     messages: [
       {
         role: "user",

@@ -5,10 +5,10 @@ import Logo from "./Logo";
 import { MobileMenu } from "./MobileMenu";
 
 const links = [
-  { label: "Features", href: "https://agentixshop.com/features" },
-  { label: "Use Cases", href: "https://agentixshop.com/use-cases" },
-  { label: "Resources", href: "https://agentixshop.com/resources" },
-  { label: "Pricing", href: "https://agentixshop.com/pricing" },
+  { label: "Features", href: "https://getnoden.com/features" },
+  { label: "Use Cases", href: "https://getnoden.com/use-cases" },
+  { label: "Resources", href: "https://getnoden.com/resources" },
+  { label: "Pricing", href: "https://getnoden.com/pricing" },
 ];
 
 export default async function Nav() {
@@ -23,7 +23,7 @@ export default async function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-bg/75 backdrop-blur">
       <div className="mx-auto flex max-w-[1228px] items-center justify-between px-6 py-4">
-        <a href="https://agentixshop.com" className="flex items-center">
+        <a href="https://getnoden.com" className="flex items-center">
           <Logo height={32} />
         </a>
 

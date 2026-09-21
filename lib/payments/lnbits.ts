@@ -38,7 +38,7 @@ export const lnbitsRail: PaymentRail = {
 
   async createPaymentRequest(amountSats, metadata): Promise<PaymentRequest> {
     requireConfig();
-    const memo = typeof metadata.memo === "string" ? metadata.memo : "Agentix order";
+    const memo = typeof metadata.memo === "string" ? metadata.memo : "Noden order";
     const data = await lnbitsFetch("/api/v1/payments", {
       method: "POST",
       body: JSON.stringify({ out: false, amount: amountSats, memo, expiry: 900 }),

@@ -58,7 +58,7 @@ export const opennodeRail: PaymentRail = {
 
   async createPaymentRequest(amountSats, metadata): Promise<PaymentRequest> {
     requireConfig();
-    const description = typeof metadata.memo === "string" ? metadata.memo : "Agentix order";
+    const description = typeof metadata.memo === "string" ? metadata.memo : "Noden order";
     const data = await opennodeFetch("/v1/charges", {
       method: "POST",
       body: JSON.stringify({ amount: amountSats, description, ttl: 15 }),

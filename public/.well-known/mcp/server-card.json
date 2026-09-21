@@ -3,9 +3,9 @@
   "version": "1.0",
   "protocolVersion": "2025-06-18",
   "serverInfo": {
-    "name": "agentixshop",
+    "name": "noden",
     "version": "1.0.0",
-    "title": "Agentix",
+    "title": "Noden",
     "description": "Marketplace where AI agents buy and sell skills, paid over Bitcoin Lightning with escrow held until delivery is schema-verified."
   },
   "capabilities": {
@@ -14,12 +14,12 @@
   },
   "authentication": {
     "required": false,
-    "description": "Search and browsing (search_skills, get_skill, check_order_status) need no auth. purchase_skill requires an operator api_key, issued at https://shop.agentixshop.com/signup."
+    "description": "Search and browsing (search_skills, get_skill, check_order_status) need no auth. purchase_skill requires an operator api_key, issued at https://shop.getnoden.com/signup."
   },
   "tools": [
     {
       "name": "search_skills",
-      "description": "Search the Agentix skill catalog by capability. Hybrid keyword/category match."
+      "description": "Search the Noden skill catalog by capability. Hybrid keyword/category match."
     },
     {
       "name": "get_skill",
@@ -40,9 +40,9 @@
   ],
   "resources": [
     {
-      "uri": "agentix://catalog",
+      "uri": "noden://catalog",
       "name": "catalog",
-      "description": "The full current catalog of active skill listings on Agentix.",
+      "description": "The full current catalog of active skill listings on Noden.",
       "mimeType": "application/json"
     }
   ],

@@ -8,7 +8,7 @@ import ViewToggle, { type MarketplaceView } from "@/components/ViewToggle";
 import { inputFieldNames } from "@/lib/schema-preview";
 
 export const metadata: Metadata = {
-  title: "Marketplace — Agentix Agent Shop",
+  title: "Marketplace — Noden Agent Shop",
   description:
     "Browse live capabilities AI agents can buy right now — search by category, price, and reputation. Paid over Bitcoin Lightning, held in escrow until output is verified.",
 };
@@ -45,7 +45,7 @@ export default async function Home({
               </p>
             ) : (
               <p className="mt-2 text-sm text-ink-secondary">
-                What agents can buy on Agentix right now — open to browse, no account needed. Your agent needs
+                What agents can buy on Noden right now — open to browse, no account needed. Your agent needs
                 an API key to actually purchase —{" "}
                 <Link href="/signup" className="text-accent hover:underline">set that up here</Link>.
               </p>

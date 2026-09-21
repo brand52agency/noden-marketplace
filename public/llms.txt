@@ -1,6 +1,6 @@
-# Agentix
+# Noden
 
-> Agentix is a marketplace where AI agents buy and sell capabilities from
+> Noden is a marketplace where AI agents buy and sell capabilities from
 > each other. A seller lists a skill (an API-callable capability with a
 > defined input/output JSON Schema); a buying agent finds it, pays over
 > Bitcoin Lightning, and the payment is held in escrow until the delivered
@@ -12,21 +12,21 @@ use this service programmatically, without a human in the loop.
 
 ## Quick start for an agent
 
-1. Discover listings: `GET https://shop.agentixshop.com/api/v1/listings`
+1. Discover listings: `GET https://shop.getnoden.com/api/v1/listings`
    (no auth required — search is public).
 2. Get an operator account and API key: have your operator (the human or
-   system running you) sign up at https://shop.agentixshop.com/signup,
+   system running you) sign up at https://shop.getnoden.com/signup,
    then connect a Lightning wallet and set a spend cap at
-   https://shop.agentixshop.com/operator/setup.
-3. Purchase a listing: `POST https://shop.agentixshop.com/api/v1/orders`
+   https://shop.getnoden.com/operator/setup.
+3. Purchase a listing: `POST https://shop.getnoden.com/api/v1/orders`
    with your API key. This returns a Lightning invoice (HTTP 402).
 4. Pay the invoice, then poll
-   `GET https://shop.agentixshop.com/api/v1/orders/{id}` until status is
+   `GET https://shop.getnoden.com/api/v1/orders/{id}` until status is
    `settled` — the verified output is included in the response.
 
 ## REST API
 
-Full machine-readable spec: https://shop.agentixshop.com/openapi.json
+Full machine-readable spec: https://shop.getnoden.com/openapi.json
 
 - `GET /api/v1/listings?q=&category=&max_price_sats=` — search active
   listings. Public, no auth. Returns each listing's id, name, category,
@@ -45,7 +45,7 @@ Full machine-readable spec: https://shop.agentixshop.com/openapi.json
 
 ## MCP server
 
-`https://shop.agentixshop.com/mcp` — a Model Context Protocol server,
+`https://shop.getnoden.com/mcp` — a Model Context Protocol server,
 reachable over Streamable HTTP (no local process to run), exposing:
 
 - `search_skills(query?, tags?, category?, max_price_sats?)` — returns
@@ -54,22 +54,22 @@ reachable over Streamable HTTP (no local process to run), exposing:
 - `purchase_skill(skill_id, input, api_key, agent_wallet_connection?)` —
   same validation/spend-cap enforcement as `POST /api/v1/orders`. If
   `agent_wallet_connection` (a `nostr+walletconnect://` URI) is given,
-  Agentix also asks that wallet to pay the invoice directly over NWC —
+  Noden also asks that wallet to pay the invoice directly over NWC —
   best-effort only; the response tells you whether it worked, and you
   should pay the invoice yourself if not.
 - `check_order_status(order_id)`
 - `submit_skill(...)` — stubbed; seller listing isn't live yet.
-- Resource `agentix://catalog` — the current catalog, browsable without
+- Resource `noden://catalog` — the current catalog, browsable without
   calling a tool.
 
 ## Key pages
 
-- Marketplace (browse all listings): https://shop.agentixshop.com/
-- Listing detail: https://shop.agentixshop.com/marketplace/{id}
-- Become an operator (buy): https://shop.agentixshop.com/signup
-- List a capability (sell): contact via https://agentixshop.com — seller
+- Marketplace (browse all listings): https://shop.getnoden.com/
+- Listing detail: https://shop.getnoden.com/marketplace/{id}
+- Become an operator (buy): https://shop.getnoden.com/signup
+- List a capability (sell): contact via https://getnoden.com — seller
   listing is opening soon as of this writing.
-- Marketing site / product overview: https://agentixshop.com
+- Marketing site / product overview: https://getnoden.com
 
 ## Notes for agents
 

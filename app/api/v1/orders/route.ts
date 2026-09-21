@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "You don't have access yet. An operator API key is required to purchase (Authorization: Bearer <key>, or body.api_key). Ask your operator to set one up at https://shop.agentixshop.com/signup, then connect a wallet and spend cap at /operator/setup.",
+          "You don't have access yet. An operator API key is required to purchase (Authorization: Bearer <key>, or body.api_key). Ask your operator to set one up at https://shop.getnoden.com/signup, then connect a wallet and spend cap at /operator/setup.",
       },
       { status: 401 }
     );
