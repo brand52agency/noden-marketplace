@@ -72,6 +72,45 @@ export async function getTopListings(limit = 5): Promise<RankedListing[]> {
     .slice(0, limit);
 }
 
+export type RelatedListing = {
+  id: string;
+  name: string;
+  category: string;
+  priceSats: number;
+  reputation: number;
+  successRate: number;
+  verifiedTrades: number;
+};
+
+// Other active listings in the same category — real catalog rows, ordered
+// the same way the main catalog defaults (reputation desc, price asc).
+export async function getRelatedListings(category: string, excludeId: string, limit = 5): Promise<RelatedListing[]> {
+  const listings = await db.listing.findMany({
+    where: { active: true, category, id: { not: excludeId } },
+    orderBy: [{ reputation: "desc" }, { priceSats: "asc" }],
+    take: limit,
+    select: {
+      id: true,
+      name: true,
+      category: true,
+      priceSats: true,
+      reputation: true,
+      successRate: true,
+      _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
+    },
+  });
+
+  return listings.map((l) => ({
+    id: l.id,
+    name: l.name,
+    category: l.category,
+    priceSats: l.priceSats,
+    reputation: l.reputation,
+    successRate: l.successRate,
+    verifiedTrades: l._count.orders,
+  }));
+}
+
 export type TrendPoint = { day: string; count: number };
 
 // Daily order counts for the last N days, real createdAt timestamps bucketed

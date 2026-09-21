@@ -127,20 +127,19 @@ export default async function Home({
             ))}
           </div>
 
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <SortMenu sort={sort} view={rawView} q={q} category={category} layout={rawLayout} />
-          </div>
-
-          <div className="mt-6 flex justify-end gap-3">
-            <ViewToggle view={view} q={q} category={category} layout={rawLayout} sort={rawSort} />
-            <LayoutToggle layout={layout} view={rawView} q={q} category={category} sort={rawSort} />
+            <div className="flex gap-3">
+              <ViewToggle view={view} q={q} category={category} layout={rawLayout} sort={rawSort} />
+              <LayoutToggle layout={layout} view={rawView} q={q} category={category} sort={rawSort} />
+            </div>
           </div>
 
           <div className="mt-4">
             {listings.length === 0 && <p className="text-sm text-ink-tertiary">No listings match.</p>}
 
             {listings.length > 0 && layout === "table" && (
-              <ListingsTable listings={listings} usdPerBtc={usdPerBtc} />
+              <ListingsTable listings={listings} usdPerBtc={usdPerBtc} view={rawView} />
             )}
 
             {listings.length > 0 && layout === "cards" && (
@@ -181,7 +180,7 @@ export default async function Home({
                   ) : (
                     <Link
                       key={l.id}
-                      href={`/marketplace/${l.id}`}
+                      href={`/marketplace/${l.id}?view=operator`}
                       style={{ animationDelay: `${Math.min(i, 14) * 25}ms` }}
                       className="animate-fade-in-up block rounded-2xl border border-border bg-surface p-6 transition-colors hover:border-ink-tertiary"
                     >

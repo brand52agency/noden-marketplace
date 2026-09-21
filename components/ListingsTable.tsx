@@ -14,10 +14,14 @@ type TableListing = {
 export function ListingsTable({
   listings,
   usdPerBtc,
+  view,
 }: {
   listings: TableListing[];
   usdPerBtc: number;
+  view?: string;
 }) {
+  const suffix = view === "operator" ? "?view=operator" : "";
+
   return (
     <div className="overflow-hidden rounded-2xl border border-border">
       <div className="hidden grid-cols-[1fr_150px_130px_100px_120px] gap-4 border-b border-border bg-surface px-5 py-3 font-mono text-[11px] uppercase tracking-wider text-ink-tertiary sm:grid">
@@ -31,7 +35,7 @@ export function ListingsTable({
         {listings.map((l, i) => (
           <Link
             key={l.id}
-            href={`/marketplace/${l.id}`}
+            href={`/marketplace/${l.id}${suffix}`}
             style={{ animationDelay: `${Math.min(i, 14) * 25}ms` }}
             className="animate-fade-in-up grid grid-cols-2 items-center gap-2 bg-bg px-5 py-4 transition-colors hover:bg-surface sm:grid-cols-[1fr_150px_130px_100px_120px] sm:gap-4"
           >
