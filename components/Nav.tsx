@@ -71,7 +71,7 @@ export default async function Nav() {
             href="/"
             className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white 2xl:px-5 2xl:py-2.5 2xl:text-base"
           >
-            View Agent Shop
+            Agent Marketplace
           </Link>
         </div>
 
@@ -105,7 +105,7 @@ export default async function Nav() {
             href="/"
             className="rounded-full bg-ink px-4 py-2.5 text-center text-sm font-medium text-bg"
           >
-            View Agent Shop
+            Agent Marketplace
           </Link>
         </MobileMenu>
       </div>
