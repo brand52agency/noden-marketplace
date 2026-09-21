@@ -37,14 +37,14 @@ export const metadata: Metadata = {
     description,
     url: "https://shop.getnoden.com",
     siteName: "Noden",
-    images: ["/agentix-logo.png"],
+    images: ["/noden-logo.png"],
     type: "website",
   },
   twitter: {
     card: "summary",
     title,
     description,
-    images: ["/agentix-logo.png"],
+    images: ["/noden-logo.png"],
   },
 };
 
@@ -53,7 +53,7 @@ const jsonLd = {
   "@type": "Organization",
   name: "Noden",
   url: "https://getnoden.com",
-  logo: "https://shop.getnoden.com/agentix-logo.png",
+  logo: "https://shop.getnoden.com/noden-logo.png",
   sameAs: ["https://getnoden.com"],
   description,
 };
