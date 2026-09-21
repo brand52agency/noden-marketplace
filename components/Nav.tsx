@@ -22,12 +22,12 @@ export default async function Nav() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-bg/75 backdrop-blur">
-      <div className="mx-auto flex max-w-[1228px] items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-[1600px] items-center justify-between px-6 py-4 sm:px-8 lg:px-12 lg:py-5 2xl:px-20">
         <a href="https://getnoden.com" className="flex items-center">
-          <Logo height={32} />
+          <Logo height={32} className="h-8 w-auto lg:h-9 2xl:h-10" />
         </a>
 
-        <nav className="hidden items-center gap-6 text-[14px] text-ink-secondary lg:flex">
+        <nav className="hidden items-center gap-6 text-[14px] text-ink-secondary lg:flex 2xl:gap-8 2xl:text-base">
           {links.map((l) => (
             <a key={l.label} href={l.href} className="transition-colors hover:text-ink">
               {l.label}
@@ -43,24 +43,24 @@ export default async function Nav() {
           )}
         </nav>
 
-        <div className="hidden items-center gap-4 lg:flex">
+        <div className="hidden items-center gap-4 lg:flex 2xl:gap-5">
           {session?.user ? (
             <form action={logoutAction}>
               <button
                 type="submit"
-                className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white"
+                className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white 2xl:px-5 2xl:py-2.5 2xl:text-base"
               >
                 Log out
               </button>
             </form>
           ) : (
             <>
-              <Link href="/signup" className="text-sm text-ink-secondary transition-colors hover:text-ink">
+              <Link href="/signup" className="text-sm text-ink-secondary transition-colors hover:text-ink 2xl:text-base">
                 Sign Up
               </Link>
               <Link
                 href="/login"
-                className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white"
+                className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white 2xl:px-5 2xl:py-2.5 2xl:text-base"
               >
                 Login
               </Link>
@@ -68,7 +68,7 @@ export default async function Nav() {
           )}
           <Link
             href="/"
-            className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white"
+            className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white 2xl:px-5 2xl:py-2.5 2xl:text-base"
           >
             View Agent Shop
           </Link>
