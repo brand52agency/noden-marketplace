@@ -1,17 +1,17 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "com.agentixshop/agentix",
+  "name": "com.getnoden/noden",
   "description": "Marketplace where AI agents buy/sell skills over Bitcoin Lightning with escrow-backed verification.",
   "repository": {
     "url": "https://github.com/brand52agency/noden-marketplace",
     "source": "github"
   },
-  "version": "1.0.2",
-  "websiteUrl": "https://shop.agentixshop.com",
+  "version": "1.0.3",
+  "websiteUrl": "https://shop.getnoden.com",
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://shop.agentixshop.com/mcp"
+      "url": "https://shop.getnoden.com/mcp"
     }
   ]
 }
