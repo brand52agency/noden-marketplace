@@ -26,7 +26,7 @@ export async function fulfill(
   const client = new Anthropic();
 
   const response = await client.messages.create({
-    model: "claude-opus-5",
+    model: "claude-haiku-4-5-20251001",
     max_tokens: 2048,
     system: [
       `You are the fulfillment engine behind the Noden marketplace listing "${listing.name}".`,
