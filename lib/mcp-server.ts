@@ -2,7 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { searchListings } from "@/lib/search";
 import { db } from "@/lib/db";
-import { createOrder, getOrderStatus, MarketplaceError } from "@/lib/marketplace";
+import { createOrder, getOrderStatus, registerSelfServeOperator, MarketplaceError } from "@/lib/marketplace";
 import { outputFieldNames } from "@/lib/schema-preview";
 import { describeReputation, COMPLETED_ORDER_STATUSES } from "@/lib/reputation";
 
@@ -69,6 +69,27 @@ export function createMcpServer() {
           output_fields: outputFieldNames(outputSchema),
         },
       });
+    }
+  );
+
+  server.registerTool(
+    "create_operator",
+    {
+      description:
+        "Self-register for an operator API key with no human required — no signup form, no login. Use this if you " +
+        "don't already have an api_key from a human operator. Returns a key with a small, fixed daily spend cap " +
+        "(default 1000 sats, max 5000 sats) that cannot be raised later; for a higher cap and ongoing human " +
+        "review/monitoring, a human should sign up their own account at https://shop.getnoden.com/signup instead.",
+      inputSchema: {
+        spend_cap_sats: z
+          .number()
+          .optional()
+          .describe("Requested daily spend cap in sats. Defaults to 1000, capped at 5000."),
+      },
+    },
+    async ({ spend_cap_sats }) => {
+      const result = await registerSelfServeOperator(spend_cap_sats);
+      return text(result);
     }
   );
 

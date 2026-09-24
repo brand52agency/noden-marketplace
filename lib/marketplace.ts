@@ -1,3 +1,5 @@
+import { randomBytes } from "crypto";
+import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { paymentRail } from "@/lib/payments";
@@ -6,6 +8,7 @@ import { verifyAgainstSchema } from "@/lib/verify";
 import { fulfill } from "@/lib/fulfillment";
 import { logAction } from "@/lib/audit";
 import { splitPayout } from "@/lib/fees";
+import { generateApiKey } from "@/lib/api-key";
 
 export class MarketplaceError extends Error {
   constructor(
@@ -230,6 +233,48 @@ export async function getOrderStatus(orderId: string) {
     where: { id: order.id },
     include: { listing: true, seller: true },
   });
+}
+
+// Default and hard-cap spend limits for an agent that self-registers with
+// no human ever visiting /signup. Kept deliberately small — a human can
+// always log in with the generated (unrecoverable, throwaway) credentials
+// later and raise it, or the agent can pass a lower cap of its own choosing.
+const SELF_SERVE_DEFAULT_SPEND_CAP_SATS = 1000;
+const SELF_SERVE_MAX_SPEND_CAP_SATS = 5000;
+
+export async function registerSelfServeOperator(requestedSpendCapSats?: number) {
+  const spendCapDailySats = Math.max(
+    1,
+    Math.min(requestedSpendCapSats ?? SELF_SERVE_DEFAULT_SPEND_CAP_SATS, SELF_SERVE_MAX_SPEND_CAP_SATS)
+  );
+
+  const email = `agent-${randomBytes(8).toString("hex")}@example.invalid`;
+  // Nobody is ever meant to log in with this — it's a random, discarded
+  // password, not a secret the agent needs. The API key is the credential.
+  const passwordHash = await bcrypt.hash(randomBytes(32).toString("hex"), 10);
+  const apiKey = generateApiKey();
+
+  const operator = await db.operator.create({
+    data: {
+      email,
+      passwordHash,
+      role: "buyer",
+      name: "Self-serve agent",
+      allowAllSellers: true,
+      spendCapDailySats,
+      apiKey,
+    },
+  });
+
+  return {
+    api_key: operator.apiKey,
+    spend_cap_daily_sats: operator.spendCapDailySats,
+    note:
+      "This key is self-issued and isn't tied to any human-owned account — there's no login for it, so save it now, it won't " +
+      `be shown again. Its spend cap is fixed at creation (max ${SELF_SERVE_MAX_SPEND_CAP_SATS} sats/day for a self-serve key) ` +
+      "and can't be raised later. For a higher cap or ongoing review/monitoring, a human should sign up their own operator " +
+      "account instead at https://shop.getnoden.com/signup.",
+  };
 }
 
 export async function refundOrder(orderId: string) {
