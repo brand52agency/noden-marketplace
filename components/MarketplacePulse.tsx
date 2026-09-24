@@ -3,7 +3,7 @@ import type { PulseStats } from "@/lib/marketplace-stats";
 export function MarketplacePulse({ stats }: { stats: PulseStats }) {
   const tiles = [
     { label: "live listings", value: stats.activeListings.toLocaleString() },
-    { label: "sellers", value: stats.sellers.toLocaleString() },
+    { label: "avg quality score", value: stats.avgQualityScore === null ? "—" : `${stats.avgQualityScore.toFixed(2)} / 5` },
     { label: "categories", value: stats.categories.toLocaleString() },
     { label: "verified trades", value: stats.verifiedTrades.toLocaleString() },
     { label: "volume settled", value: `${stats.volumeSettledSats.toLocaleString()} sats` },

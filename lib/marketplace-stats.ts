@@ -3,7 +3,7 @@ import { COMPLETED_ORDER_STATUSES } from "@/lib/reputation";
 
 export type PulseStats = {
   activeListings: number;
-  sellers: number;
+  avgQualityScore: number | null;
   categories: number;
   verifiedTrades: number;
   volumeSettledSats: number;
@@ -15,18 +15,32 @@ export type PulseStats = {
 export async function getPulseStats(): Promise<PulseStats> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const [activeListings, sellerRows, categoryRows, verifiedTrades, volume, ordersLast7d] = await Promise.all([
+  const [activeListings, tradedListings, categoryRows, verifiedTrades, volume, ordersLast7d] = await Promise.all([
     db.listing.count({ where: { active: true } }),
-    db.listing.findMany({ where: { active: true }, select: { sellerId: true }, distinct: ["sellerId"] }),
+    // Reputation defaults to 5.0 for a listing that's never traded — that's
+    // not an earned score, so averaging it in would be fabricating quality
+    // data. Only listings with a real verified trade count here.
+    db.listing.findMany({
+      where: { active: true },
+      select: {
+        reputation: true,
+        _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
+      },
+    }),
     db.listing.findMany({ where: { active: true }, select: { category: true }, distinct: ["category"] }),
     db.order.count({ where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } }),
     db.order.aggregate({ _sum: { amountSats: true }, where: { status: "settled" } }),
     db.order.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
   ]);
 
+  const traded = tradedListings.filter((l) => l._count.orders > 0);
+  const avgQualityScore = traded.length
+    ? traded.reduce((sum, l) => sum + l.reputation, 0) / traded.length
+    : null;
+
   return {
     activeListings,
-    sellers: sellerRows.length,
+    avgQualityScore,
     categories: categoryRows.length,
     verifiedTrades,
     volumeSettledSats: volume._sum.amountSats ?? 0,
