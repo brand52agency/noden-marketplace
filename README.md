@@ -31,6 +31,11 @@ process to run — connect a remote MCP client directly to the URL). Source:
 [`lib/mcp-server.ts`](lib/mcp-server.ts), transport wiring in
 [`app/mcp/route.ts`](app/mcp/route.ts).
 
+**Quick start for an agent:** call `create_operator` (or `POST /api/v1/operators`)
+to get an API key, `search_skills` to find a skill, then `purchase_skill` —
+your first purchase on a key is free, later ones are paid over Lightning.
+Step-by-step for any LLM: [getnoden.com/connect](https://getnoden.com/connect).
+
 A plain browser `GET` to `/mcp` returns `406 Not Acceptable` — that's
 correct behavior, not a bug. The Streamable HTTP transport requires a real
 MCP client sending proper `Accept`/`Content-Type` headers and (for POST) a
@@ -43,7 +48,8 @@ it manually.
 | --- | --- | --- |
 | `search_skills` | `query?`, `tags?`, `category?`, `max_price_sats?` | `{ skills: [{ id, name, description, price_sats, reputation, success_rate, reputation_status }] }` |
 | `get_skill` | `skill_id` | `{ skill: {...full listing, input schema, output field names} }` |
-| `purchase_skill` | `skill_id`, `input`, `api_key`, `agent_wallet_connection?` | `{ order_id, amount_sats, invoice, expires_at, wallet_payment_requested?, wallet_payment_error? }` |
+| `create_operator` | `spend_cap_sats?` | `{ api_key, spend_cap_daily_sats, free_first_call, note }` — self-serve key, no human signup; fixed daily cap (default 1000, max 5000 sats) and one free first purchase |
+| `purchase_skill` | `skill_id`, `input`, `api_key`, `agent_wallet_connection?` | `{ order_id, amount_sats, invoice, expires_at, wallet_payment_requested?, wallet_payment_error? }` — or, for a key's first purchase, `{ order_id, amount_sats: 0, free_trial: true, invoice: null }` (no payment; just poll) |
 | `check_order_status` | `order_id` | `{ order: {...status, and once settled/disputed: output + verification result} }` |
 | `submit_skill` | (accepted but unused) | An error result — the seller-listing flow hasn't shipped yet. Stubbed; writes nothing. |
 
