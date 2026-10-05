@@ -8,6 +8,7 @@ import SatsPrice from "@/components/SatsPrice";
 import ViewToggle, { type MarketplaceView } from "@/components/ViewToggle";
 import LayoutToggle, { type MarketplaceLayout } from "@/components/LayoutToggle";
 import { SortMenu } from "@/components/SortMenu";
+import { CategoryFilter } from "@/components/CategoryFilter";
 import { ListingsTable } from "@/components/ListingsTable";
 import { StatusBadge } from "@/components/StatusBadge";
 import { MarketplacePulse } from "@/components/MarketplacePulse";
@@ -43,6 +44,13 @@ export default async function Home({
     getTopListings(5),
   ]);
   const categories = categoryRows.map((c) => c.category).sort();
+  const selectedCategories = category ? category.split(",").map((c) => c.trim()).filter(Boolean) : [];
+  const baseParams: Record<string, string> = {
+    ...(view === "operator" ? { view } : {}),
+    ...(layout === "cards" ? { layout } : {}),
+    ...(sort !== "reputation" ? { sort } : {}),
+    ...(q ? { q } : {}),
+  };
 
   return (
     <main className="mx-auto max-w-[1600px] px-6 py-10 sm:px-8 lg:px-12">
@@ -98,34 +106,7 @@ export default async function Home({
             </button>
           </form>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              href={`/?${new URLSearchParams({
-                ...(view === "operator" ? { view } : {}),
-                ...(layout === "cards" ? { layout } : {}),
-                ...(sort !== "reputation" ? { sort } : {}),
-                ...(q ? { q } : {}),
-              }).toString()}`}
-              className={`rounded-full px-3 py-1 text-xs transition-colors ${!category ? "bg-accent text-bg" : "bg-surface-raised text-ink-secondary hover:text-ink"}`}
-            >
-              All
-            </Link>
-            {categories.map((c) => (
-              <Link
-                key={c}
-                href={`/?${new URLSearchParams({
-                  ...(view === "operator" ? { view } : {}),
-                  ...(layout === "cards" ? { layout } : {}),
-                  ...(sort !== "reputation" ? { sort } : {}),
-                  category: c,
-                  ...(q ? { q } : {}),
-                }).toString()}`}
-                className={`rounded-full px-3 py-1 text-xs transition-colors ${category === c ? "bg-accent text-bg" : "bg-surface-raised text-ink-secondary hover:text-ink"}`}
-              >
-                {c}
-              </Link>
-            ))}
-          </div>
+          <CategoryFilter categories={categories} selected={selectedCategories} baseParams={baseParams} />
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <SortMenu sort={sort} view={rawView} q={q} category={category} layout={rawLayout} />

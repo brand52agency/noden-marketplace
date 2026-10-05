@@ -23,8 +23,12 @@ export type ListingSearchParams = {
 export async function searchListings({ query, category, maxPriceSats, sort }: ListingSearchParams) {
   const where: Prisma.ListingWhereInput = { active: true };
 
-  if (category) {
-    where.category = { equals: category };
+  // `category` may be a comma-separated list (the web filter is multi-select).
+  const categories = category ? category.split(",").map((c) => c.trim()).filter(Boolean) : [];
+  if (categories.length === 1) {
+    where.category = { equals: categories[0] };
+  } else if (categories.length > 1) {
+    where.category = { in: categories };
   }
   if (typeof maxPriceSats === "number") {
     where.priceSats = { lte: maxPriceSats };
