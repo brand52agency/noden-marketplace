@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await createOrder(apiKey, listingId, input);
-    return NextResponse.json(result, { status: 402 });
+    return NextResponse.json(result, { status: "free_trial" in result ? 201 : 402 });
   } catch (err) {
     if (err instanceof MarketplaceError) {
       return NextResponse.json({ error: err.message }, { status: err.status });

@@ -25,7 +25,7 @@ export async function signupAction(_prev: ActionState, formData: FormData): Prom
 
   const passwordHash = await bcrypt.hash(password, 10);
   await db.operator.create({
-    data: { email, passwordHash, role: "buyer", apiKey: generateApiKey() },
+    data: { email, passwordHash, role: "buyer", trialCallsRemaining: 1, apiKey: generateApiKey() },
   });
 
   await signIn("credentials", { email, password, redirectTo: "/operator/setup" });

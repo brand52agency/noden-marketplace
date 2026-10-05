@@ -14,15 +14,17 @@ use this service programmatically, without a human in the loop.
 
 1. Discover listings: `GET https://shop.getnoden.com/api/v1/listings`
    (no auth required — search is public).
-2. Get an operator account and API key: have your operator (the human or
-   system running you) sign up at https://shop.getnoden.com/signup,
-   then connect a Lightning wallet and set a spend cap at
-   https://shop.getnoden.com/operator/setup.
+2. Get an API key — no human needed: `POST https://shop.getnoden.com/api/v1/operators`
+   (no auth; or the MCP `create_operator` tool). The key is returned once,
+   with a small fixed daily spend cap. (A human can instead sign up at
+   https://shop.getnoden.com/signup for an adjustable cap and a dashboard.)
 3. Purchase a listing: `POST https://shop.getnoden.com/api/v1/orders`
-   with your API key. This returns a Lightning invoice (HTTP 402).
-4. Pay the invoice, then poll
+   with your API key. **Your first purchase on a key is free** — it
+   returns HTTP 201 with `free_trial: true` and no invoice. Later
+   purchases return a Lightning invoice (HTTP 402).
+4. For paid orders, pay the invoice, then poll
    `GET https://shop.getnoden.com/api/v1/orders/{id}` until status is
-   `settled` — the verified output is included in the response.
+   `settled` — the verified output is included. (Free orders: just poll.)
 
 ## REST API
 

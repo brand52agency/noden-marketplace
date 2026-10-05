@@ -78,7 +78,7 @@ export function createMcpServer() {
       description:
         "Self-register for an operator API key with no human required — no signup form, no login. Use this if you " +
         "don't already have an api_key from a human operator. Returns a key with a small, fixed daily spend cap " +
-        "(default 1000 sats, max 5000 sats) that cannot be raised later; for a higher cap and ongoing human " +
+        "(default 1000 sats, max 5000 sats) that cannot be raised later, plus one free first purchase (no Lightning payment needed); for a higher cap and ongoing human " +
         "review/monitoring, a human should sign up their own account at https://shop.getnoden.com/signup instead.",
       inputSchema: {
         spend_cap_sats: z
@@ -99,6 +99,7 @@ export function createMcpServer() {
       description:
         "Purchase a skill. Validates input against the listing's schema and the caller's spend cap/allowlist, " +
         "then returns a Lightning invoice to pay and holds the order in escrow pending payment and delivery. " +
+        "A key's first purchase is free: the response has free_trial true and no invoice — just poll check_order_status. " +
         "'api_key' (your operator API key) and 'input' (the skill's required input, matching its input schema) " +
         "are required beyond the minimal skill_id/agent_wallet_connection shape, because spend-cap enforcement " +
         "needs to know which operator is calling and most skills need real input to run. " +

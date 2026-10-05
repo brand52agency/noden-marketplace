@@ -47,6 +47,27 @@ export async function getOperatorByApiKey(apiKey: string) {
   return operator;
 }
 
+const FREE_TRIAL_DAILY_LIMIT = Number(process.env.FREE_TRIAL_DAILY_LIMIT ?? 50);
+const TRIAL_HASH_PREFIX = "trial_";
+
+// A new operator's first purchase runs for free so an agent can evaluate
+// Noden without holding a Lightning wallet. Noden eats the (Haiku) cost, so
+// it's bounded two ways: one credit per operator, and a global daily cap on
+// trial orders — beyond which callers just get the normal invoice flow.
+async function claimFreeTrial(operatorId: string): Promise<boolean> {
+  const startOfDay = new Date();
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  const usedToday = await db.order.count({
+    where: { amountSats: 0, railPaymentHash: { startsWith: TRIAL_HASH_PREFIX }, createdAt: { gte: startOfDay } },
+  });
+  if (usedToday >= FREE_TRIAL_DAILY_LIMIT) return false;
+  const claimed = await db.operator.updateMany({
+    where: { id: operatorId, trialCallsRemaining: { gt: 0 } },
+    data: { trialCallsRemaining: { decrement: 1 } },
+  });
+  return claimed.count === 1;
+}
+
 export async function createOrder(
   apiKey: string,
   listingId: string,
@@ -72,6 +93,42 @@ export async function createOrder(
     }
   }
 
+  const inputCheck = verifyAgainstSchema(input, listing.inputSchema as object);
+  if (!inputCheck.valid) {
+    throw new MarketplaceError(`input does not match listing schema: ${inputCheck.errors}`, 422);
+  }
+
+  if (await claimFreeTrial(operator.id)) {
+    let trialOrder;
+    try {
+      trialOrder = await db.order.create({
+        data: {
+          buyerId: operator.id,
+          sellerId: listing.sellerId,
+          listingId: listing.id,
+          input: input as Prisma.InputJsonValue,
+          amountSats: 0,
+          railInvoiceRef: "free-trial",
+          railPaymentHash: `${TRIAL_HASH_PREFIX}${randomBytes(16).toString("hex")}`,
+          status: "pending_payment",
+        },
+      });
+    } catch (err) {
+      await db.operator.update({ where: { id: operator.id }, data: { trialCallsRemaining: { increment: 1 } } });
+      throw err;
+    }
+    await logAction(operator.id, "purchase", { orderId: trialOrder.id, listingId: listing.id, amountSats: 0, freeTrial: true });
+    return {
+      order_id: trialOrder.id,
+      amount_sats: 0,
+      free_trial: true as const,
+      invoice: null,
+      message:
+        "Free first call — no payment needed. Poll GET /api/v1/orders/{order_id} (or the check_order_status tool); " +
+        "the result runs on your first poll. Later purchases are paid over Lightning.",
+    };
+  }
+
   if (operator.spendCapDailySats <= 0) {
     throw new MarketplaceError(
       "you don't have access yet — no spend cap is set. Ask your operator to configure one at https://shop.getnoden.com/operator/setup",
@@ -83,11 +140,6 @@ export async function createOrder(
       `purchase would exceed today's spend cap (${operator.spendUsedTodaySats}/${operator.spendCapDailySats} sats used)`,
       403
     );
-  }
-
-  const inputCheck = verifyAgainstSchema(input, listing.inputSchema as object);
-  if (!inputCheck.valid) {
-    throw new MarketplaceError(`input does not match listing schema: ${inputCheck.errors}`, 422);
   }
 
   let paymentRequest;
@@ -153,7 +205,8 @@ export async function getOrderStatus(orderId: string) {
     return order;
   }
 
-  const payStatus = await paymentRail.checkStatus(order.railPaymentHash);
+  const isTrial = order.railPaymentHash.startsWith(TRIAL_HASH_PREFIX);
+  const payStatus = isTrial ? "paid" : await paymentRail.checkStatus(order.railPaymentHash);
   if (payStatus !== "paid") {
     return order;
   }
@@ -173,7 +226,7 @@ export async function getOrderStatus(orderId: string) {
   await logAction(order.buyerId, "verification", { orderId: order.id, pass: verification.valid });
 
   if (verification.valid) {
-    const payoutDestination = order.seller.payoutLightningAddress ?? order.seller.nwcConnection;
+    const payoutDestination = isTrial ? null : (order.seller.payoutLightningAddress ?? order.seller.nwcConnection);
     // With no external payout destination — true today, since Noden is the
     // only seller and hasn't registered a payout address for itself — the
     // full amount simply stays in Noden's own LNbits wallet, so all of it
@@ -263,6 +316,7 @@ export async function registerSelfServeOperator(requestedSpendCapSats?: number) 
       name: "Self-serve agent",
       allowAllSellers: true,
       spendCapDailySats,
+      trialCallsRemaining: 1,
       apiKey,
     },
   });
@@ -270,8 +324,9 @@ export async function registerSelfServeOperator(requestedSpendCapSats?: number) 
   return {
     api_key: operator.apiKey,
     spend_cap_daily_sats: operator.spendCapDailySats,
+    free_first_call: true,
     note:
-      "This key is self-issued and isn't tied to any human-owned account — there's no login for it, so save it now, it won't " +
+      "Your first purchase with this key is free (no Lightning payment needed); after that, purchases are paid over Lightning. This key is self-issued and isn't tied to any human-owned account — there's no login for it, so save it now, it won't " +
       `be shown again. Its spend cap is fixed at creation (max ${SELF_SERVE_MAX_SPEND_CAP_SATS} sats/day for a self-serve key) ` +
       "and can't be raised later. For a higher cap or ongoing review/monitoring, a human should sign up their own operator " +
       "account instead at https://shop.getnoden.com/signup.",
@@ -282,14 +337,19 @@ export async function refundOrder(orderId: string) {
   const order = await db.order.findUnique({ where: { id: orderId }, include: { buyer: true } });
   if (!order) throw new MarketplaceError("unknown order_id", 404);
 
-  const refundDestination = order.buyer.nwcConnection ?? order.buyer.payoutLightningAddress;
-  if (refundDestination) {
-    await paymentRail.payOut(refundDestination, order.amountSats, `Refund for order ${order.id}`);
+  if (order.amountSats === 0) {
+    // Free-trial order: nothing was paid, so give the credit back.
+    await db.operator.update({ where: { id: order.buyerId }, data: { trialCallsRemaining: { increment: 1 } } });
+  } else {
+    const refundDestination = order.buyer.nwcConnection ?? order.buyer.payoutLightningAddress;
+    if (refundDestination) {
+      await paymentRail.payOut(refundDestination, order.amountSats, `Refund for order ${order.id}`);
+    }
+    await db.operator.update({
+      where: { id: order.buyerId },
+      data: { spendUsedTodaySats: { decrement: order.amountSats } },
+    });
   }
-  await db.operator.update({
-    where: { id: order.buyerId },
-    data: { spendUsedTodaySats: { decrement: order.amountSats } },
-  });
   return db.order.update({
     where: { id: order.id },
     data: { status: "refunded" },

@@ -58,11 +58,47 @@
         }
       }
     },
+    "/api/v1/operators": {
+      "post": {
+        "operationId": "createOperator",
+        "summary": "Self-register for an API key",
+        "description": "No auth, no human signup. Returns an api_key (shown once) with a fixed daily spend cap (default 1000 sats, max 5000) and one free first purchase.",
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "spend_cap_sats": { "type": "number", "description": "Requested daily cap, clamped to 1-5000" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Key issued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "api_key": { "type": "string" },
+                    "spend_cap_daily_sats": { "type": "number" },
+                    "free_first_call": { "type": "boolean" },
+                    "note": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/orders": {
       "post": {
         "operationId": "purchaseListing",
         "summary": "Purchase a listing",
-        "description": "Validates input against the listing's schema and the caller's spend cap/seller allowlist, then returns a Lightning invoice to pay (HTTP 402).",
+        "description": "Validates input against the listing's schema and the caller's spend cap/seller allowlist, then returns a Lightning invoice to pay (HTTP 402). A key's first purchase is free: it returns HTTP 201 with free_trial true and no invoice — just poll the order.",
         "requestBody": {
           "required": true,
           "content": {
@@ -80,6 +116,7 @@
           }
         },
         "responses": {
+          "201": { "description": "Free first call — no invoice, no payment needed. Poll the order for the result (body has free_trial: true)." },
           "402": {
             "description": "Order created — Lightning invoice attached, payment required",
             "content": {

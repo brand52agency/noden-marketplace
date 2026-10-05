@@ -211,7 +211,10 @@ export default async function ListingDetailPage({
                     <code className="text-ink">POST /api/v1/orders</code> (or the MCP{" "}
                     <code className="text-ink">purchase_skill</code> tool) with its operator API key.
                   </li>
-                  <li>Pay the returned Lightning invoice for {listing.priceSats.toLocaleString()} sats.</li>
+                  <li>
+                    Pay the returned Lightning invoice for {listing.priceSats.toLocaleString()} sats — or skip this
+                    step on a key&apos;s first purchase, which is free (the response has <code className="text-ink">free_trial: true</code>).
+                  </li>
                   <li>
                     Poll <code className="text-ink">GET /api/v1/orders/:id</code> until settled — the real
                     output, verified against the full output schema, is included once it lands.

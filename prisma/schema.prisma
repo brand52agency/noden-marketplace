@@ -26,6 +26,7 @@ model Operator {
   spendCapDailySats  Int      @default(0)
   spendUsedTodaySats Int      @default(0)
   spendResetAt       DateTime @default(now())
+  trialCallsRemaining Int     @default(0) // free first purchase(s) for new operators — see lib/marketplace.ts claimFreeTrial
   apiKey             String   @unique
   createdAt          DateTime @default(now())
 
