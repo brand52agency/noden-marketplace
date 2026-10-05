@@ -6,6 +6,20 @@
 // this instead of reading the raw columns directly.
 export const COMPLETED_ORDER_STATUSES = ["settled", "disputed", "refunded"] as const;
 
+// Orders from seeded demo buyers, internal test operators, and the registry
+// protocol-test operator are real rows (admin still sees them) but must never
+// feed public trust numbers. amountSats > 0 also excludes free-trial orders,
+// which can't be paid for and so shouldn't be farmable into a reputation.
+export const DEMO_BUYER_WHERE = {
+  OR: [
+    { email: { endsWith: "@agentixshop.dev" } },
+    { email: { endsWith: "@noden.internal" } },
+    { email: { startsWith: "mcp-protocol-test-" } },
+  ],
+};
+export const REAL_ORDER_WHERE = { NOT: { buyer: DEMO_BUYER_WHERE }, amountSats: { gt: 0 } };
+export const REAL_COMPLETED_WHERE = { ...REAL_ORDER_WHERE, status: { in: [...COMPLETED_ORDER_STATUSES] } };
+
 export function describeReputation(
   listing: { reputation: number; successRate: number },
   verifiedTrades: number

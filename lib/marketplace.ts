@@ -9,6 +9,7 @@ import { fulfill } from "@/lib/fulfillment";
 import { logAction } from "@/lib/audit";
 import { splitPayout } from "@/lib/fees";
 import { generateApiKey } from "@/lib/api-key";
+import { REAL_COMPLETED_WHERE } from "@/lib/reputation";
 
 export class MarketplaceError extends Error {
   constructor(
@@ -297,7 +298,7 @@ export async function refundOrder(orderId: string) {
 }
 
 async function recalcReputation(listingId: string) {
-  const orders = await db.order.findMany({ where: { listingId, status: { in: ["settled", "disputed", "refunded"] } } });
+  const orders = await db.order.findMany({ where: { listingId, ...REAL_COMPLETED_WHERE } });
   if (orders.length === 0) return;
   const settled = orders.filter((o) => o.status === "settled").length;
   const successRate = settled / orders.length;

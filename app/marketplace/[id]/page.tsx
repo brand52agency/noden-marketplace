@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { RelatedSkills } from "@/components/RelatedSkills";
 import { getRelatedListings } from "@/lib/marketplace-stats";
 import { inputFieldNames, outputFieldNames } from "@/lib/schema-preview";
-import { describeReputation, COMPLETED_ORDER_STATUSES } from "@/lib/reputation";
+import { describeReputation, REAL_COMPLETED_WHERE } from "@/lib/reputation";
 
 const RECENT_ORDERS_LIMIT = 8;
 
@@ -48,12 +48,12 @@ export default async function ListingDetailPage({
       include: {
         seller: { select: { name: true, email: true, createdAt: true } },
         orders: {
-          where: { status: { in: [...COMPLETED_ORDER_STATUSES] } },
+          where: REAL_COMPLETED_WHERE,
           orderBy: { createdAt: "desc" },
           take: RECENT_ORDERS_LIMIT,
           select: { id: true, amountSats: true, status: true, createdAt: true },
         },
-        _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
+        _count: { select: { orders: { where: REAL_COMPLETED_WHERE } } },
       },
     }),
     getBtcUsdRate(),

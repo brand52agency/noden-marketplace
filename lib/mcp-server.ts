@@ -4,7 +4,7 @@ import { searchListings } from "@/lib/search";
 import { db } from "@/lib/db";
 import { createOrder, getOrderStatus, registerSelfServeOperator, MarketplaceError } from "@/lib/marketplace";
 import { outputFieldNames } from "@/lib/schema-preview";
-import { describeReputation, COMPLETED_ORDER_STATUSES } from "@/lib/reputation";
+import { describeReputation, REAL_COMPLETED_WHERE } from "@/lib/reputation";
 
 function text(value: unknown) {
   return { content: [{ type: "text" as const, text: JSON.stringify(value, null, 2) }] };
@@ -58,7 +58,7 @@ export function createMcpServer() {
     async ({ skill_id }) => {
       const listing = await db.listing.findUnique({
         where: { id: skill_id },
-        include: { _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } } },
+        include: { _count: { select: { orders: { where: REAL_COMPLETED_WHERE } } } },
       });
       if (!listing) return errorText("unknown skill_id");
       const { outputSchema, successRate, reputation, _count, ...rest } = listing;

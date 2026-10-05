@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { COMPLETED_ORDER_STATUSES } from "@/lib/reputation";
+import { REAL_COMPLETED_WHERE, REAL_ORDER_WHERE } from "@/lib/reputation";
 
 export type PulseStats = {
   activeListings: number;
@@ -8,6 +8,8 @@ export type PulseStats = {
   verifiedTrades: number;
   volumeSettledSats: number;
   ordersLast7d: number;
+  minPriceSats: number | null;
+  maxPriceSats: number | null;
 };
 
 // All real aggregates off Listing/Order — no placeholder numbers. See
@@ -15,7 +17,7 @@ export type PulseStats = {
 export async function getPulseStats(): Promise<PulseStats> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const [activeListings, tradedListings, categoryRows, verifiedTrades, volume, ordersLast7d] = await Promise.all([
+  const [activeListings, tradedListings, categoryRows, verifiedTrades, volume, ordersLast7d, priceRange] = await Promise.all([
     db.listing.count({ where: { active: true } }),
     // Reputation defaults to 5.0 for a listing that's never traded — that's
     // not an earned score, so averaging it in would be fabricating quality
@@ -24,13 +26,14 @@ export async function getPulseStats(): Promise<PulseStats> {
       where: { active: true },
       select: {
         reputation: true,
-        _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
+        _count: { select: { orders: { where: REAL_COMPLETED_WHERE } } },
       },
     }),
     db.listing.findMany({ where: { active: true }, select: { category: true }, distinct: ["category"] }),
-    db.order.count({ where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } }),
-    db.order.aggregate({ _sum: { amountSats: true }, where: { status: "settled" } }),
-    db.order.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+    db.order.count({ where: REAL_COMPLETED_WHERE }),
+    db.order.aggregate({ _sum: { amountSats: true }, where: { status: "settled", ...REAL_ORDER_WHERE } }),
+    db.order.count({ where: { createdAt: { gte: sevenDaysAgo }, ...REAL_ORDER_WHERE } }),
+    db.listing.aggregate({ where: { active: true }, _min: { priceSats: true }, _max: { priceSats: true } }),
   ]);
 
   const traded = tradedListings.filter((l) => l._count.orders > 0);
@@ -45,6 +48,8 @@ export async function getPulseStats(): Promise<PulseStats> {
     verifiedTrades,
     volumeSettledSats: volume._sum.amountSats ?? 0,
     ordersLast7d,
+    minPriceSats: priceRange._min.priceSats,
+    maxPriceSats: priceRange._max.priceSats,
   };
 }
 
@@ -68,7 +73,7 @@ export async function getTopListings(limit = 5): Promise<RankedListing[]> {
       category: true,
       reputation: true,
       successRate: true,
-      _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
+      _count: { select: { orders: { where: REAL_COMPLETED_WHERE } } },
     },
   });
 
@@ -110,7 +115,7 @@ export async function getRelatedListings(category: string, excludeId: string, li
       priceSats: true,
       reputation: true,
       successRate: true,
-      _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
+      _count: { select: { orders: { where: REAL_COMPLETED_WHERE } } },
     },
   });
 

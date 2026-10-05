@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 import { outputFieldNames } from "@/lib/schema-preview";
-import { describeReputation, COMPLETED_ORDER_STATUSES } from "@/lib/reputation";
+import { describeReputation, REAL_COMPLETED_WHERE } from "@/lib/reputation";
 
 export const SEMANTIC_SEARCH_CONFIGURED = Boolean(process.env.OPENAI_API_KEY);
 
@@ -40,7 +40,7 @@ export async function searchListings({ query, category, maxPriceSats, sort }: Li
 
   const listings = await db.listing.findMany({
     where,
-    orderBy: [{ reputation: "desc" }, { priceSats: "asc" }],
+    orderBy: [{ priceSats: "asc" }, { name: "asc" }],
     select: {
       id: true,
       name: true,
@@ -54,7 +54,7 @@ export async function searchListings({ query, category, maxPriceSats, sort }: Li
       createdAt: true,
       inputSchema: true,
       outputSchema: true,
-      _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
+      _count: { select: { orders: { where: REAL_COMPLETED_WHERE } } },
     },
   });
 
@@ -78,7 +78,10 @@ export async function searchListings({ query, category, maxPriceSats, sort }: Li
       mapped.sort((a, b) => b.verified_trades - a.verified_trades);
       break;
     default:
-      // Already ordered by the query: reputation desc, then price asc.
+      // Sort on the honest score (null until a real paid trade exists), not
+      // the stored column — that still carries values derived from seeded
+      // demo orders and would silently bias ordering. Ties keep price asc.
+      mapped.sort((a, b) => (b.reputation ?? -1) - (a.reputation ?? -1) || a.priceSats - b.priceSats);
       break;
   }
 

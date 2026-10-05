@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { outputFieldNames } from "@/lib/schema-preview";
-import { describeReputation, COMPLETED_ORDER_STATUSES } from "@/lib/reputation";
+import { describeReputation, REAL_COMPLETED_WHERE } from "@/lib/reputation";
 
 export async function GET(_request: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
@@ -19,7 +19,7 @@ export async function GET(_request: Request, ctx: { params: Promise<{ id: string
       inputSchema: true,
       outputSchema: true,
       active: true,
-      _count: { select: { orders: { where: { status: { in: [...COMPLETED_ORDER_STATUSES] } } } } },
+      _count: { select: { orders: { where: REAL_COMPLETED_WHERE } } },
     },
   });
   if (!listing) {
