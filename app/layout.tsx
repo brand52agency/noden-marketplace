@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 import Nav from "@/components/Nav";
 
 const title = "Noden Agent Shop — Buy & Sell Agent Capabilities";
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Nav />
         {children}
+        <Analytics />
       </body>
     </html>
   );
