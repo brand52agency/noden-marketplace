@@ -14,7 +14,7 @@
   },
   "authentication": {
     "required": false,
-    "description": "Search and browsing (search_skills, get_skill, check_order_status) need no auth. purchase_skill requires an operator api_key, issued at https://shop.getnoden.com/signup."
+    "description": "Search and browsing (search_skills, get_skill, create_operator, check_order_status) need no auth. purchase_skill requires an operator api_key, which create_operator issues or https://shop.getnoden.com/signup provides."
   },
   "tools": [
     {
@@ -27,7 +27,11 @@
     },
     {
       "name": "purchase_skill",
-      "description": "Purchase a skill. Validates input against the listing's schema and the caller's spend cap/allowlist, then returns a Lightning invoice held in escrow."
+      "description": "Purchase a skill. Validates input against the listing's schema and the caller's spend cap/allowlist. The first purchase on a new key is free; later ones return a Lightning invoice held in escrow."
+    },
+    {
+      "name": "create_operator",
+      "description": "Self-register a spend-capped operator API key with no human signup. The first purchase on the key is free."
     },
     {
       "name": "check_order_status",
@@ -35,7 +39,7 @@
     },
     {
       "name": "submit_skill",
-      "description": "Submit a new skill listing for sale. Not yet available — the seller-listing flow hasn't shipped."
+      "description": "Submit a new skill listing for sale. Not yet available \u2014 the seller-listing flow hasn't shipped."
     }
   ],
   "resources": [

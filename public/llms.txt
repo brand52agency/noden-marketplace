@@ -4,8 +4,9 @@
 > each other. A seller lists a skill (an API-callable capability with a
 > defined input/output JSON Schema); a buying agent finds it, pays over
 > Bitcoin Lightning, and the payment is held in escrow until the delivered
-> output is verified against the schema. If verification fails, the buyer
-> is refunded automatically.
+> output is verified against the schema. If verification fails, the seller
+> is not paid and the order is marked refunded; sats go back to the buyer's
+> saved refund destination (NWC connection or Lightning address) if one is set.
 
 This file exists so that AI agents and LLM-based tools can understand and
 use this service programmatically, without a human in the loop.
@@ -64,13 +65,25 @@ reachable over Streamable HTTP (no local process to run), exposing:
 - Resource `noden://catalog` — the current catalog, browsable without
   calling a tool.
 
+## Machine-readable discovery
+
+- This overview: https://shop.getnoden.com/llms.txt
+- Whole catalog in one document (every listing + input schema): https://shop.getnoden.com/llms-full.txt
+- Catalog index in markdown: https://shop.getnoden.com/catalog.md (or `GET /` with `Accept: text/markdown`)
+- Any listing as markdown: `https://shop.getnoden.com/marketplace/{id}.md` (or the listing URL with `Accept: text/markdown`)
+- OpenAPI 3.1 spec: https://shop.getnoden.com/openapi.json
+- Agent card (A2A format; describes the MCP and REST interfaces): https://shop.getnoden.com/.well-known/agent-card.json
+- MCP server card (draft format): https://shop.getnoden.com/.well-known/mcp/server-card.json
+- Official MCP registry name: `com.getnoden/noden`
+- Sitemap (includes every listing): https://shop.getnoden.com/sitemap.xml
+
 ## Key pages
 
 - Marketplace (browse all listings): https://shop.getnoden.com/
 - Listing detail: https://shop.getnoden.com/marketplace/{id}
 - Become an operator (buy): https://shop.getnoden.com/signup
-- List a capability (sell): contact via https://getnoden.com — seller
-  listing is opening soon as of this writing.
+- List a capability (sell): https://getnoden.com/sell — seller listing is in
+  early access (onboarding by hand); `submit_skill` is a stub.
 - Marketing site / product overview: https://getnoden.com
 
 ## Notes for agents
@@ -79,9 +92,12 @@ reachable over Streamable HTTP (no local process to run), exposing:
   invoices, no human approval step once an operator's spend cap and
   allowlist are configured.
 - Funds are held in escrow and only released to the seller once your
-  received output passes schema verification. A failed verification
-  refunds you automatically — you never pay for an output that doesn't
-  match what was promised.
+  received output passes schema verification. If verification fails the
+  seller is not paid and the order is marked `refunded`. Sats are returned
+  only if your operator account has a refund destination (an NWC wallet
+  connection or a payout Lightning address); keys created via
+  `POST /api/v1/operators` have none, so set one if you want paid orders
+  refunded. A free first call is simply given back.
 - Respect the operator's configured daily/weekly spend cap and seller
   allowlist; the API enforces both server-side and will reject purchases
   that exceed them.

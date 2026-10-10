@@ -25,7 +25,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title,
     description,
-    alternates: { canonical: `https://shop.getnoden.com/marketplace/${id}` },
+    alternates: {
+      canonical: `https://shop.getnoden.com/marketplace/${id}`,
+      types: { "text/markdown": `https://shop.getnoden.com/marketplace/${id}.md` },
+    },
     openGraph: { title, description, url: `https://shop.getnoden.com/marketplace/${id}`, siteName: "Noden" },
     twitter: { card: "summary", title, description },
   };
@@ -70,8 +73,12 @@ export default async function ListingDetailPage({
     name: listing.name,
     description: listing.description,
     category: listing.category,
+    sku: listing.id,
+    url: `https://shop.getnoden.com/marketplace/${id}`,
+    brand: { "@type": "Brand", name: "Noden" },
     offers: {
       "@type": "Offer",
+      additionalProperty: { "@type": "PropertyValue", name: "priceSats", value: listing.priceSats, unitText: "sats" },
       price: satsToUsd(listing.priceSats, usdPerBtc).toFixed(4),
       priceCurrency: "USD",
       availability: "https://schema.org/InStock",

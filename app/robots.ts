@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: "*",
-        allow: ["/", "/marketplace", "/api/v1/", "/mcp", "/operator", "/llms.txt", "/openapi.json"],
+        allow: ["/", "/marketplace", "/api/v1/", "/mcp", "/operator", "/llms.txt", "/llms-full.txt", "/catalog.md", "/openapi.json", "/.well-known/"],
         disallow: ["/admin", "/api/auth", "/operator/dashboard", "/operator/setup", "/operator/audit-log"],
       },
       // Explicitly welcome known AI/agent crawlers — this marketplace exists
