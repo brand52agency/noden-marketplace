@@ -69,7 +69,7 @@ export function MoneyGrid() {
             ctx!.textBaseline = "middle";
             ctx!.fillText(symbol, x, y);
           } else {
-            ctx!.fillStyle = "rgba(255, 255, 255, 0.14)";
+            ctx!.fillStyle = "rgba(27, 27, 31, 0.16)";
             ctx!.beginPath();
             ctx!.arc(x, y, 1, 0, Math.PI * 2);
             ctx!.fill();

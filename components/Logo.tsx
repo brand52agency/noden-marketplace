@@ -6,7 +6,7 @@ const ASPECT_RATIO = 1200 / 300;
 export default function Logo({ height = 32, className = "" }: { height?: number; className?: string }) {
   return (
     <Image
-      src="/noden-logo.png"
+      src="/noden-logo-dark.png"
       alt="Noden"
       width={Math.round(height * ASPECT_RATIO)}
       height={height}

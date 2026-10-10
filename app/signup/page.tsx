@@ -57,7 +57,7 @@ export default function SignupPage() {
                 <li key={item} className="flex items-start gap-3 text-sm text-ink">
                   <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-                      <path d="M5 13l4 4L19 7" stroke="#08080a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </span>
                   {item}

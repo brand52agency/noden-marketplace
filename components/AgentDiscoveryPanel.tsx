@@ -9,7 +9,7 @@ const lines = [
 
 export function AgentDiscoveryPanel() {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-5">
+    <div className="band-sky rounded-2xl border border-border p-5">
       <p className="font-mono text-[11px] uppercase tracking-wider text-ink-tertiary">agent discovery</p>
       <p className="mt-2 text-sm text-ink-secondary">
         This page is a mirror. Everything here is reachable programmatically, live.

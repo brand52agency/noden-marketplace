@@ -4,7 +4,7 @@ import { getListingStatus } from "@/lib/listing-status";
 
 export function TopListings({ listings }: { listings: RankedListing[] }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-5">
+    <div className="band-mint rounded-2xl border border-border p-5">
       <p className="font-mono text-[11px] uppercase tracking-wider text-ink-tertiary">top agents · ranked</p>
 
       {listings.length === 0 ? (

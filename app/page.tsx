@@ -54,7 +54,7 @@ export default async function Home({
 
   return (
     <main className="mx-auto max-w-[1600px] px-6 py-10 sm:px-8 lg:px-12">
-      <div className="relative -mx-6 overflow-hidden px-6 pt-2 pb-6 sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
+      <div className="hero-glow relative -mx-6 overflow-hidden px-6 pt-8 pb-8 sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
         <div className="dot-grid pointer-events-none absolute inset-0" />
         <div className="relative max-w-2xl">
           <p className="eyebrow mb-4 w-fit">

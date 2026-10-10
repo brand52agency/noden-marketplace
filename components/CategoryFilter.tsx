@@ -92,7 +92,7 @@ export function CategoryFilter({
                         type="checkbox"
                         checked={on}
                         onChange={() => toggle(c)}
-                        className="h-4 w-4 shrink-0 accent-[#ee6833]"
+                        className="h-4 w-4 shrink-0 accent-[#c9441a]"
                       />
                       {c}
                     </label>
