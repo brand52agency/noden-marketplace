@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 const NOTIFY_EMAIL = "getnoden@proton.me";
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
-// Called cross-origin from getnoden.com/earn's signup form, so this
+// Called cross-origin from getnoden.com/sell's signup form, so this
 // needs its own CORS handling — every other route here is same-origin
 // (called from this app itself, or by an API client with no CORS
 // concept at all) and doesn't need any of this.

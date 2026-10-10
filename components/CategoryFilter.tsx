@@ -23,9 +23,13 @@ export function CategoryFilter({
   const rootRef = useRef<HTMLDivElement>(null);
   const selectedKey = selected.join(",");
 
-  useEffect(() => {
+  // Reset the draft when the URL selection changes (adjusting state during
+  // render rather than in an effect, per the React docs).
+  const [syncedKey, setSyncedKey] = useState(selectedKey);
+  if (syncedKey !== selectedKey) {
+    setSyncedKey(selectedKey);
     setDraft(selectedKey ? selectedKey.split(",") : []);
-  }, [selectedKey]);
+  }
 
   useEffect(() => {
     if (!open) return;
