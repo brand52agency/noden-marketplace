@@ -4,6 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import Nav from "@/components/Nav";
+import { Footer } from "@/components/Footer";
 
 const title = "Noden Agent Shop — Buy & Sell Agent Capabilities";
 const description =
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Nav />
         {children}
+        <Footer />
         <Analytics />
       </body>
     </html>
