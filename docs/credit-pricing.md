@@ -1,6 +1,6 @@
 # Credit pricing and unit economics
 
-Generated 2026-10-11 by `npm run credits:generate` from the live catalog (173 active listings). Do not edit by hand.
+Generated 2026-10-11 by `npm run credits:generate` from the live catalog (179 active listings). Do not edit by hand.
 
 ## How a credit price is set
 
@@ -37,7 +37,7 @@ Cheapest net credit is 0.53¢. Pricing assumes **0.50¢** (5% lower, for tax, re
 
 ## Result
 
-- Credit prices range 5–42 credits. Distribution: 5 credits × 76, 6 credits × 71, 7 credits × 5, 8 credits × 7, 9 credits × 1, 10 credits × 4, 11 credits × 2, 12 credits × 1, 13 credits × 1, 14 credits × 1, 15 credits × 1, 17 credits × 1, 38 credits × 1, 42 credits × 1.
+- Credit prices range 0–42 credits. Distribution: 0 credits × 2, 5 credits × 78, 6 credits × 71, 7 credits × 5, 8 credits × 7, 9 credits × 1, 10 credits × 5, 11 credits × 2, 12 credits × 1, 13 credits × 1, 14 credits × 1, 15 credits × 2, 17 credits × 1, 38 credits × 1, 42 credits × 1.
 - Lowest margin at the floor: **25%** on the worst possible call, **81%** on a typical call.
 - 58 listings are priced above their sats-derived price because of cost.
 
@@ -46,13 +46,15 @@ Cheapest net credit is 0.53¢. Pricing assumes **0.50¢** (5% lower, for tax, re
 A failed check returns no output and no sats; the buyer gets a retry token for one free call (up to 2 per payment, 24 hours). That cap makes the exposure finite: one payment can trigger at most 3 model calls.
 
 - **Realistic:** if 10% of calls fail, expected cost per paid call rises about 11%. Typical margins (at least 81%) absorb that easily.
-- **Deliberate abuse** (input crafted to fail every attempt, maximum size and output): up to 3 × 2.05¢ = 6.15¢ of compute against one payment. Against the sats price that is a loss on 98 of 173 listings, at most 1.98¢ per abusive payment, and each abusive payment still costs the attacker the full price. Failed-call rate limits per key (NODEN_PRICING_TASKS.md F4) are still needed to cap this per hour.
+- **Deliberate abuse** (input crafted to fail every attempt, maximum size and output): up to 3 × 2.05¢ = 6.15¢ of compute against one payment. Against the sats price that is a loss on 100 of 179 listings, at most 1.98¢ per abusive payment, and each abusive payment still costs the attacker the full price. Failed-call rate limits per key (NODEN_PRICING_TASKS.md F4) are still needed to cap this per hour.
 - Free-trial calls are bounded the same way: one trial plus at most two free retries (3 calls) per verified email.
 
 ## Per listing
 
 | Listing | Category | Sats | Credits | Typical cost | Worst-case cost | Typical margin | Worst margin | Input bounded by schema |
 |---|---|---|---|---|---|---|---|---|
+| Agent-Readiness Check | Dev Tools | 0 | 0 | 0.05¢ | 0.05¢ | 100% | 100% | yes |
+| Web Page to Clean Data | Data | 0 | 0 | 0.05¢ | 0.05¢ | 100% | 100% | yes |
 | API Response Schema Inferrer | Dev Tools | 50 | 6 | 0.39¢ | 2.03¢ | 87% | 33% | no (capped) |
 | Abandoned Cart Recovery Copy Agent | E-commerce | 50 | 6 | 0.19¢ | 2.02¢ | 94% | 33% | no (capped) |
 | Ad Copy Generator | Marketing | 50 | 5 | 0.36¢ | 1.41¢ | 86% | 44% | yes |
@@ -180,7 +182,9 @@ A failed check returns no output and no sats; the buyer gets a retry token for o
 | Crypto Funding-Rate Arbitrage Monitor | Finance | 60 | 6 | 0.40¢ | 2.04¢ | 87% | 32% | no (capped) |
 | Data Deduplication Agent | Data | 60 | 6 | 0.38¢ | 2.02¢ | 87% | 33% | no (capped) |
 | Dependency CVE Alert Agent | Security | 60 | 5 | 0.36¢ | 1.41¢ | 86% | 44% | yes |
+| Domain Availability and DNS Lookup | DevOps | 60 | 5 | 0.05¢ | 0.05¢ | 98% | 98% | yes |
 | Landing Page Message Hierarchy Auditor | Marketing | 60 | 5 | 0.45¢ | 1.43¢ | 82% | 43% | yes |
+| Live FX and Currency Conversion | Finance | 60 | 5 | 0.05¢ | 0.05¢ | 98% | 98% | yes |
 | Meeting Prep Briefing Agent | Sales | 60 | 6 | 0.19¢ | 2.02¢ | 94% | 33% | no (capped) |
 | SEO Content Scorer | Marketing | 60 | 6 | 0.23¢ | 2.02¢ | 92% | 33% | no (capped) |
 | Shipment Route Optimizer | Logistics | 60 | 6 | 0.38¢ | 2.02¢ | 87% | 33% | no (capped) |
@@ -215,6 +219,7 @@ A failed check returns no output and no sats; the buyer gets a retry token for o
 | Anomaly Detection Agent | Finance | 100 | 9 | 0.36¢ | 2.02¢ | 92% | 55% | no (capped) |
 | Trademark Infringement Scanner | Legal | 110 | 10 | 0.36¢ | 2.02¢ | 93% | 60% | no (capped) |
 | Code Review Agent | Dev Tools | 120 | 10 | 0.37¢ | 1.42¢ | 93% | 72% | yes |
+| Dependency CVE Lookup | Security | 120 | 10 | 0.05¢ | 0.05¢ | 99% | 99% | yes |
 | GDPR Data Request Handler Agent | Compliance | 120 | 10 | 0.38¢ | 1.41¢ | 92% | 72% | yes |
 | RFP Response Drafting Agent | Procurement | 120 | 10 | 0.19¢ | 1.41¢ | 96% | 72% | yes |
 | Market Sizing Estimator | Research | 130 | 11 | 0.25¢ | 1.41¢ | 95% | 74% | yes |
@@ -223,6 +228,7 @@ A failed check returns no output and no sats; the buyer gets a retry token for o
 | Regulation Lookup Agent | Compliance | 150 | 13 | 0.41¢ | 1.41¢ | 94% | 78% | yes |
 | AML Transaction Screening Agent | Compliance | 160 | 14 | 0.38¢ | 1.41¢ | 95% | 80% | yes |
 | Patent Prior-Art Search Agent | Research | 180 | 15 | 0.36¢ | 1.26¢ | 95% | 83% | yes |
+| Sitemap and Broken Link Crawler | Dev Tools | 180 | 15 | 0.05¢ | 0.05¢ | 99% | 99% | yes |
 | Competitor Scan Agent | Research | 200 | 17 | 0.36¢ | 1.41¢ | 96% | 83% | yes |
 | Contract Clause Review Agent | Legal | 450 | 38 | 0.37¢ | 2.03¢ | 98% | 89% | no (capped) |
 | Smart Contract Security Audit Agent | Security | 500 | 42 | 0.37¢ | 1.26¢ | 98% | 94% | yes |
