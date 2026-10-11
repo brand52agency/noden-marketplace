@@ -62,7 +62,7 @@
       "post": {
         "operationId": "createOperator",
         "summary": "Self-register for an API key",
-        "description": "No auth, no human signup. Returns an api_key (shown once) with a fixed daily spend cap (default 1000 sats, max 5000) and one free first purchase.",
+        "description": "No auth, no human signup. Returns an api_key (shown once) with a fixed daily spend cap (default 1000 sats, max 5000). Self-issued keys have no free call: purchases are paid over Lightning.",
         "requestBody": {
           "required": false,
           "content": {
@@ -98,7 +98,7 @@
       "post": {
         "operationId": "purchaseListing",
         "summary": "Purchase a listing",
-        "description": "Validates input against the listing's schema and the caller's spend cap/seller allowlist, then returns a Lightning invoice to pay (HTTP 402). A key's first purchase is free: it returns HTTP 201 with free_trial true and no invoice — just poll the order.",
+        "description": "Validates input against the listing's schema and the caller's spend cap/seller allowlist, then returns a Lightning invoice to pay (HTTP 402). A verified human account gets one free call on a listing priced at or below the trial cap: it returns HTTP 201 with free_trial true and no invoice — just poll the order. Every other purchase returns an invoice.",
         "requestBody": {
           "required": true,
           "content": {
@@ -116,7 +116,7 @@
           }
         },
         "responses": {
-          "201": { "description": "Free first call — no invoice, no payment needed. Poll the order for the result (body has free_trial: true)." },
+          "201": { "description": "Free trial call (verified account) — no invoice, no payment needed. Poll the order for the result (body has free_trial: true)." },
           "402": {
             "description": "Order created — Lightning invoice attached, payment required",
             "content": {

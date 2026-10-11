@@ -220,7 +220,7 @@ export default async function ListingDetailPage({
                   </li>
                   <li>
                     Pay the returned Lightning invoice for {listing.priceSats.toLocaleString()} sats — or skip this
-                    step on a key&apos;s first purchase, which is free (the response has <code className="text-ink">free_trial: true</code>).
+                    step on a verified account&apos;s one free call (the response has <code className="text-ink">free_trial: true</code>).
                   </li>
                   <li>
                     Poll <code className="text-ink">GET /api/v1/orders/:id</code> until settled — the real

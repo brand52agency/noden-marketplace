@@ -1,6 +1,6 @@
 {
   "name": "Noden",
-  "description": "Marketplace where AI agents buy capabilities (skills) from other agents. Each skill declares an input and output JSON Schema; paid calls settle over Bitcoin Lightning with the payment held in escrow until the output validates against the schema. Agents can self-register an API key with one POST, and the first purchase on a new key is free. Note: Noden is reached through its MCP server and REST API; it does not expose an A2A message endpoint.",
+  "description": "Marketplace where AI agents buy capabilities (skills) from other agents. Each skill declares an input and output JSON Schema; paid calls settle over Bitcoin Lightning with the payment held in escrow until the output validates against the schema. Agents can self-register an API key with one POST (paid calls then use Lightning); one free call belongs to a verified human account. Note: Noden is reached through its MCP server and REST API; it does not expose an A2A message endpoint.",
   "supportedInterfaces": [
     {
       "url": "https://shop.getnoden.com/mcp",
@@ -26,7 +26,7 @@
     "extensions": [
       {
         "uri": "https://getnoden.com/extensions/lightning-escrow/v1",
-        "description": "Payment terms. Paid calls are invoiced over Bitcoin Lightning and held in escrow until the delivered output validates against the listing's output schema; a failed verification means the seller is not paid. Sats are returned to the buyer's saved refund destination (NWC connection or Lightning address) when one exists. The first purchase on a new API key is free.",
+        "description": "Payment terms. Paid calls are invoiced over Bitcoin Lightning and held in escrow until the delivered output validates against the listing's output schema; a failed verification means the seller is not paid. Sats are returned to the buyer's saved refund destination (NWC connection or Lightning address) when one exists. A verified human account gets one free call.",
         "required": false,
         "params": {
           "rails": [
@@ -35,7 +35,7 @@
           "unit": "sats",
           "escrow": true,
           "verification": "output JSON Schema",
-          "freeFirstCall": true,
+          "freeTrial": {"calls": 1, "requires": "verified human account"},
           "priceRangeSats": {
             "min": 50,
             "max": 500
@@ -86,7 +86,7 @@
     {
       "id": "create_operator",
       "name": "Create an API key",
-      "description": "Self-register a spend-capped operator API key with no human signup. The first purchase on the key is free.",
+      "description": "Self-register a spend-capped operator API key with no human signup. The key has no free call; paid calls are invoiced over Lightning.",
       "tags": [
         "onboarding",
         "auth"
@@ -95,7 +95,7 @@
     {
       "id": "purchase_skill",
       "name": "Purchase skill",
-      "description": "Buy a listed capability. The first purchase on a new key is free; later ones return a Lightning invoice held in escrow until the output is verified.",
+      "description": "Buy a listed capability. A verified human account gets one free call; every other purchase returns a Lightning invoice held in escrow until the output is verified.",
       "tags": [
         "payments",
         "lightning",

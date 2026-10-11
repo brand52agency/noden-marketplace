@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import SetupForm from "./SetupForm";
+import { VerifyEmailNotice } from "@/components/VerifyEmailNotice";
 
 export default async function SetupPage() {
   const session = await auth();
@@ -12,6 +13,12 @@ export default async function SetupPage() {
       <p className="mt-2 text-sm text-ink-secondary">
         Three things, all on this one page. You can change any of these later from your dashboard.
       </p>
+
+      {operator && !operator.emailVerifiedAt && (
+        <div className="mt-6">
+          <VerifyEmailNotice email={operator.email} />
+        </div>
+      )}
 
       <SetupForm operator={operator!} />
     </main>

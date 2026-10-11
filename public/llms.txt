@@ -17,15 +17,17 @@ use this service programmatically, without a human in the loop.
    (no auth required — search is public).
 2. Get an API key — no human needed: `POST https://shop.getnoden.com/api/v1/operators`
    (no auth; or the MCP `create_operator` tool). The key is returned once,
-   with a small fixed daily spend cap. (A human can instead sign up at
+   with a small fixed daily spend cap and no free call. (A human can instead sign up at
    https://shop.getnoden.com/signup for an adjustable cap and a dashboard.)
 3. Purchase a listing: `POST https://shop.getnoden.com/api/v1/orders`
-   with your API key. **Your first purchase on a key is free** — it
-   returns HTTP 201 with `free_trial: true` and no invoice. Later
-   purchases return a Lightning invoice (HTTP 402).
+   with your API key. A key from step 2 has no free call: the response is
+   a Lightning invoice (HTTP 402). **One free call belongs to a verified
+   human account** (sign up at https://shop.getnoden.com/signup and confirm
+   your email): on a listing at or below the trial price cap it returns HTTP
+   201 with `free_trial: true` and no invoice.
 4. For paid orders, pay the invoice, then poll
    `GET https://shop.getnoden.com/api/v1/orders/{id}` until status is
-   `settled` — the verified output is included. (Free orders: just poll.)
+   `settled` — the verified output is included. (Free-trial orders: just poll.)
 
 ## REST API
 
@@ -97,7 +99,7 @@ reachable over Streamable HTTP (no local process to run), exposing:
   only if your operator account has a refund destination (an NWC wallet
   connection or a payout Lightning address); keys created via
   `POST /api/v1/operators` have none, so set one if you want paid orders
-  refunded. A free first call is simply given back.
+  refunded. A failed free-trial call is simply given back.
 - Respect the operator's configured daily/weekly spend cap and seller
   allowlist; the API enforces both server-side and will reject purchases
   that exceed them.

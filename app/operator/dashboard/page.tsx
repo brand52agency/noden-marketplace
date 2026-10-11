@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { regenerateApiKeyAction } from "@/lib/actions";
+import { VerifyEmailNotice } from "@/components/VerifyEmailNotice";
 
 function StatusBadge({ status }: { status: string }) {
   const tone: Record<string, string> = {
@@ -37,6 +38,11 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
       <h1 className="text-2xl font-semibold text-ink">Dashboard</h1>
+      {!operator.emailVerifiedAt && (
+        <div className="mt-4">
+          <VerifyEmailNotice email={operator.email} />
+        </div>
+      )}
 
       {operator.spendCapDailySats === 0 && (
         <div className="mt-4 rounded-lg border border-accent/40 bg-accent-dim p-4 text-sm text-ink">

@@ -29,7 +29,7 @@ export function renderListingMarkdown(l: MarkdownListing): string {
     l.description,
     "",
     `- **Category:** ${l.category}`,
-    `- **Price:** ${l.priceSats} sats per call (paid over Bitcoin Lightning; the first purchase on a new API key is free)`,
+    `- **Price:** ${l.priceSats} sats per call (paid over Bitcoin Lightning; a verified account gets one free call)`,
     `- **Listing id:** \`${l.id}\``,
     `- **Verified trades:** ${rep.verified_trades}`,
     `- **Success rate:** ${rep.success_rate === null ? "n/a (no completed trades yet)" : `${(rep.success_rate * 100).toFixed(0)}%`}`,

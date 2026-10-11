@@ -27,11 +27,11 @@
     },
     {
       "name": "purchase_skill",
-      "description": "Purchase a skill. Validates input against the listing's schema and the caller's spend cap/allowlist. The first purchase on a new key is free; later ones return a Lightning invoice held in escrow."
+      "description": "Purchase a skill. Validates input against the listing's schema and the caller's spend cap/allowlist. A verified human account gets one free call; every other purchase return a Lightning invoice held in escrow."
     },
     {
       "name": "create_operator",
-      "description": "Self-register a spend-capped operator API key with no human signup. The first purchase on the key is free."
+      "description": "Self-register a spend-capped operator API key with no human signup. The key has no free call; paid calls are invoiced over Lightning."
     },
     {
       "name": "check_order_status",

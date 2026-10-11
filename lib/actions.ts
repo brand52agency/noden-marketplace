@@ -7,6 +7,8 @@ import { auth, signIn, signOut } from "@/lib/auth";
 import { generateApiKey } from "@/lib/api-key";
 import { refundOrder } from "@/lib/marketplace";
 import { revalidatePath } from "next/cache";
+import { isDisposableEmail } from "@/lib/email-policy";
+import { sendVerificationEmail } from "@/lib/verification";
 
 export type ActionState = { error?: string } | null;
 
@@ -23,10 +25,16 @@ export async function signupAction(_prev: ActionState, formData: FormData): Prom
     return { error: "An account with that email already exists." };
   }
 
+  if (isDisposableEmail(email)) {
+    return { error: "Please use a permanent email address — temporary inboxes aren't accepted." };
+  }
+
   const passwordHash = await bcrypt.hash(password, 10);
-  await db.operator.create({
-    data: { email, passwordHash, role: "buyer", trialCallsRemaining: 1, apiKey: generateApiKey() },
+  const operator = await db.operator.create({
+    data: { email, passwordHash, role: "buyer", apiKey: generateApiKey() },
   });
+  // The free first call is granted when the email is confirmed, not at signup.
+  await sendVerificationEmail(operator.id);
 
   await signIn("credentials", { email, password, redirectTo: "/operator/setup" });
   return null;
@@ -95,4 +103,19 @@ export async function regenerateInsightsAction() {
   const { getInsights } = await import("@/lib/insights");
   await getInsights(true);
   revalidatePath("/admin/insights");
+}
+
+export async function resendVerificationAction(): Promise<ActionState> {
+  const session = await auth();
+  if (!session?.user?.id) return { error: "Not signed in." };
+  const result = await sendVerificationEmail(session.user.id);
+  if (result.sent) return null;
+  const messages = {
+    already_verified: "Your email is already confirmed.",
+    too_soon: "A link was just sent — give it a minute, then check your inbox and spam folder.",
+    daily_limit: "Too many verification emails today. Try again tomorrow.",
+    send_failed: "We couldn't send the email right now. Try again in a few minutes.",
+    not_found: "Account not found.",
+  } as const;
+  return { error: messages[result.reason] };
 }

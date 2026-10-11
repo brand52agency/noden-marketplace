@@ -48,13 +48,25 @@ export async function getOperatorByApiKey(apiKey: string) {
 }
 
 const FREE_TRIAL_DAILY_LIMIT = Number(process.env.FREE_TRIAL_DAILY_LIMIT ?? 50);
+// The trial only covers cheap listings, so a free call never costs Noden much.
+const FREE_TRIAL_MAX_PRICE_SATS = Number(process.env.FREE_TRIAL_MAX_PRICE_SATS ?? 150);
+// Kill switch: set FREE_TRIAL_ENABLED=false to stop all free calls immediately.
+const FREE_TRIAL_ENABLED = process.env.FREE_TRIAL_ENABLED !== "false";
 const TRIAL_HASH_PREFIX = "trial_";
 
-// A new operator's first purchase runs for free so an agent can evaluate
-// Noden without holding a Lightning wallet. Noden eats the (Haiku) cost, so
-// it's bounded two ways: one credit per operator, and a global daily cap on
-// trial orders — beyond which callers just get the normal invoice flow.
-async function claimFreeTrial(operatorId: string): Promise<boolean> {
+// One free purchase belongs to a *verified account* (one per normalized email,
+// enforced by TrialClaim in lib/verification.ts) — never to an API key. Keys
+// created anonymously via POST /api/v1/operators have no trial at all. Noden
+// eats the (Haiku) cost, so it's bounded: verified owner, cheap listing, and a
+// global daily cap on trial orders. Anything else gets the normal invoice flow.
+async function claimFreeTrial(
+  operator: { id: string; emailVerifiedAt: Date | null },
+  listing: { priceSats: number }
+): Promise<boolean> {
+  if (!FREE_TRIAL_ENABLED) return false;
+  if (!operator.emailVerifiedAt) return false;
+  if (listing.priceSats > FREE_TRIAL_MAX_PRICE_SATS) return false;
+  const operatorId = operator.id;
   const startOfDay = new Date();
   startOfDay.setUTCHours(0, 0, 0, 0);
   const usedToday = await db.order.count({
@@ -98,7 +110,7 @@ export async function createOrder(
     throw new MarketplaceError(`input does not match listing schema: ${inputCheck.errors}`, 422);
   }
 
-  if (await claimFreeTrial(operator.id)) {
+  if (await claimFreeTrial(operator, listing)) {
     let trialOrder;
     try {
       trialOrder = await db.order.create({
@@ -124,7 +136,7 @@ export async function createOrder(
       free_trial: true as const,
       invoice: null,
       message:
-        "Free first call — no payment needed. Poll GET /api/v1/orders/{order_id} (or the check_order_status tool); " +
+        "Free first call for your verified account — no payment needed. Poll GET /api/v1/orders/{order_id} (or the check_order_status tool); " +
         "the result runs on your first poll. Later purchases are paid over Lightning.",
     };
   }
@@ -316,7 +328,6 @@ export async function registerSelfServeOperator(requestedSpendCapSats?: number) 
       name: "Self-serve agent",
       allowAllSellers: true,
       spendCapDailySats,
-      trialCallsRemaining: 1,
       apiKey,
     },
   });
@@ -324,9 +335,11 @@ export async function registerSelfServeOperator(requestedSpendCapSats?: number) 
   return {
     api_key: operator.apiKey,
     spend_cap_daily_sats: operator.spendCapDailySats,
-    free_first_call: true,
+    free_first_call: false,
     note:
-      "Your first purchase with this key is free (no Lightning payment needed); after that, purchases are paid over Lightning. This key is self-issued and isn't tied to any human-owned account — there's no login for it, so save it now, it won't " +
+      "Purchases with this key are paid over Lightning: POST /api/v1/orders returns an invoice (HTTP 402) and the skill runs once it is paid. " +
+      "The free first call belongs to a verified human account, not to a key — sign up and confirm your email at https://shop.getnoden.com/signup to get it. " +
+      "This key is self-issued and isn't tied to any human-owned account — there's no login for it, so save it now, it won't " +
       `be shown again. Its spend cap is fixed at creation (max ${SELF_SERVE_MAX_SPEND_CAP_SATS} sats/day for a self-serve key) ` +
       "and can't be raised later. For a higher cap or ongoing review/monitoring, a human should sign up their own operator " +
       "account instead at https://shop.getnoden.com/signup.",
