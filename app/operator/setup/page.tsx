@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import SetupForm from "./SetupForm";
 import { VerifyEmailNotice } from "@/components/VerifyEmailNotice";
+import { NewKeyBanner } from "@/components/NewKeyBanner";
 
 export default async function SetupPage() {
   const session = await auth();
@@ -19,6 +20,10 @@ export default async function SetupPage() {
           <VerifyEmailNotice email={operator.email} />
         </div>
       )}
+
+      <div className="mt-6">
+        <NewKeyBanner />
+      </div>
 
       <SetupForm operator={operator!} />
     </main>

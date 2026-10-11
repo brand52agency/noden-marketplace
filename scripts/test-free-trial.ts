@@ -7,7 +7,7 @@ import { db } from "../lib/db";
 import { paymentRail } from "../lib/payments";
 import { createOrder, registerSelfServeOperator } from "../lib/marketplace";
 import { verifyEmailToken } from "../lib/verification";
-import { generateApiKey } from "../lib/api-key";
+import { apiKeyFields, generateApiKey } from "../lib/api-key";
 
 const TAG = `f1test-${Date.now()}`;
 const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
@@ -24,9 +24,11 @@ paymentRail.createPaymentRequest = async () => {
 };
 
 async function humanOperator(email: string) {
-  return db.operator.create({
-    data: { email, passwordHash: "x", role: "buyer", spendCapDailySats: 5000, allowAllSellers: true, apiKey: generateApiKey() },
+  const key = generateApiKey();
+  const op = await db.operator.create({
+    data: { email, passwordHash: "x", role: "buyer", spendCapDailySats: 5000, allowAllSellers: true, ...apiKeyFields(key) },
   });
+  return { ...op, apiKey: key }; // plaintext, for the test only; the row holds just the hash
 }
 async function verifyNow(operatorId: string) {
   const token = randomBytes(32).toString("hex");

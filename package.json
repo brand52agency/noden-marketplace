@@ -13,7 +13,9 @@
     "test:credits": "tsx scripts/test-credit-pricing.ts",
     "test:orders": "tsx scripts/test-order-view.ts",
     "test:retries": "tsx scripts/test-retry-tokens.ts",
-    "migrate:order-states": "tsx scripts/migrate-order-states.ts"
+    "migrate:order-states": "tsx scripts/migrate-order-states.ts",
+    "migrate:api-keys": "tsx scripts/migrate-api-keys.ts",
+    "test:abuse": "tsx scripts/test-abuse-limits.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

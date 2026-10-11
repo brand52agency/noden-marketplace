@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
 import { Prisma } from "@prisma/client";
 
-export type AuditAction = "search" | "purchase" | "verification" | "failure" | "retry" | "payout" | "fulfillment_cost";
+export type AuditAction = "search" | "purchase" | "verification" | "failure" | "retry" | "payout" | "fulfillment_cost" | "key_paused";
 
 export function logAction(operatorId: string, action: AuditAction, detail: Record<string, unknown>) {
   return db.auditLogEntry.create({

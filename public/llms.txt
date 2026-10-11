@@ -112,6 +112,12 @@ reachable over Streamable HTTP (no local process to run), exposing:
   API key, valid 24 hours. A retry that fails again earns another token, up
   to 2 free retries per original payment. This applies to free-trial calls too.
 - Inputs are limited to 24,000 characters; larger requests get HTTP 413.
+- Limits that return HTTP 429 (with a `Retry-After` header where it applies): creating keys
+  (5 per IP and 20 per network range per hour) and a key that has had 5 calls fail their check
+  in the last hour is paused until those failures age out. Check inputs against the listing's
+  input schema to avoid it.
+- API keys are stored only as a SHA-256 hash, so a key cannot be shown again after it is created.
+  Owners can regenerate or revoke a key from https://shop.getnoden.com/operator/dashboard.
 - Respect the operator's configured daily/weekly spend cap and seller
   allowlist; the API enforces both server-side and will reject purchases
   that exceed them.

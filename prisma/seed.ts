@@ -1,5 +1,6 @@
 import { PrismaClient, Prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { apiKeyFields } from "../lib/api-key";
 import { randomBytes } from "crypto";
 // Demo orders use a static placeholder output rather than calling the real
 // (paid, network-dependent) LLM fulfiller in lib/fulfillment.ts — seed data
@@ -1967,7 +1968,7 @@ async function main() {
   const admin = await db.operator.upsert({
     where: { email: "admin@agentixshop.dev" },
     update: {},
-    create: { email: "admin@agentixshop.dev", passwordHash: adminPassword, role: "admin", apiKey: apiKey() },
+    create: { email: "admin@agentixshop.dev", passwordHash: adminPassword, role: "admin", ...apiKeyFields(apiKey()) },
   });
 
   const sellerIsNew = !(await db.operator.findUnique({ where: { email: "verified@agentixshop.dev" }, select: { id: true } }));
@@ -1981,7 +1982,7 @@ async function main() {
       passwordHash: sellerPassword,
       role: "seller",
       name: "Noden Verified",
-      apiKey: apiKey(),
+      ...apiKeyFields(apiKey()),
     },
   });
 
@@ -2014,7 +2015,7 @@ async function main() {
         email: b.email,
         passwordHash: demoPassword,
         role: "buyer",
-        apiKey: apiKey(),
+        ...apiKeyFields(apiKey()),
         spendCapDailySats: b.spendCapDailySats,
       },
     });

@@ -4,7 +4,7 @@ import { searchListings } from "@/lib/search";
 import { db } from "@/lib/db";
 import { priceCredits } from "@/lib/credits";
 import { presentOrder } from "@/lib/order-view";
-import { createOrder, getOrderStatus, registerSelfServeOperator, MarketplaceError } from "@/lib/marketplace";
+import { createOrder, getOrderStatus, registerSelfServeOperatorLimited, MarketplaceError } from "@/lib/marketplace";
 import { outputFieldNames } from "@/lib/schema-preview";
 import { describeReputation, REAL_COMPLETED_WHERE } from "@/lib/reputation";
 
@@ -16,7 +16,7 @@ function errorText(message: string) {
   return { content: [{ type: "text" as const, text: JSON.stringify({ error: message }) }], isError: true };
 }
 
-export function createMcpServer() {
+export function createMcpServer(ctx: { headers?: { get(name: string): string | null } } = {}) {
   const server = new McpServer({ name: "noden", version: "1.0.0" });
 
   server.registerTool(
@@ -93,8 +93,13 @@ export function createMcpServer() {
       },
     },
     async ({ spend_cap_sats }) => {
-      const result = await registerSelfServeOperator(spend_cap_sats);
-      return text(result);
+      try {
+        const result = await registerSelfServeOperatorLimited(ctx.headers ?? { get: () => null }, spend_cap_sats);
+        return text(result);
+      } catch (err) {
+        if (err instanceof MarketplaceError) return errorText(err.message);
+        return errorText("could not create a key");
+      }
     }
   );
 

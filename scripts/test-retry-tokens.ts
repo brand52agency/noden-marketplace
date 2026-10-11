@@ -6,7 +6,7 @@ import { db } from "../lib/db";
 import { FULFILLMENT_CONFIGURED } from "../lib/fulfillment";
 import { MAX_RETRIES_PER_PAYMENT, createOrder, getOrderStatus, issueRetryToken } from "../lib/marketplace";
 import { presentOrder } from "../lib/order-view";
-import { generateApiKey } from "../lib/api-key";
+import { apiKeyFields, generateApiKey } from "../lib/api-key";
 
 if (FULFILLMENT_CONFIGURED) {
   console.log("SKIP: ANTHROPIC_API_KEY is set, so calls would really run. Unset it to run this test.");
@@ -16,7 +16,8 @@ if (FULFILLMENT_CONFIGURED) {
 const TAG = `retrytest-${Date.now()}`;
 
 async function operator(suffix: string) {
-  return db.operator.create({
+  const key = generateApiKey();
+  const op = await db.operator.create({
     data: {
       email: `${TAG}-${suffix}@example.com`,
       passwordHash: "x",
@@ -24,9 +25,10 @@ async function operator(suffix: string) {
       emailVerifiedAt: new Date(),
       trialCallsRemaining: 1,
       spendCapDailySats: 5000,
-      apiKey: generateApiKey(),
+      ...apiKeyFields(key),
     },
   });
+  return { ...op, apiKey: key }; // plaintext, for the test only; the row holds just the hash
 }
 
 function validInput(schema: unknown): Record<string, unknown> {

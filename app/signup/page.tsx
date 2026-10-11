@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ShieldCheck, Wallet, Eye } from "lucide-react";
@@ -32,6 +32,7 @@ const perks = [
 ];
 
 export default function SignupPage() {
+  const [formStartedAt] = useState(() => Date.now());
   const [state, formAction, pending] = useActionState(signupAction, null);
 
   return (
@@ -85,6 +86,14 @@ export default function SignupPage() {
             action={formAction}
             className="mt-8 flex flex-col gap-4 rounded-2xl border border-border bg-surface p-8"
           >
+            <input type="hidden" name="formStartedAt" value={formStartedAt} />
+            {/* Honeypot: invisible to people and assistive tech; bots tend to fill every field. */}
+            <div aria-hidden className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+              <label>
+                Company
+                <input name="company" tabIndex={-1} autoComplete="off" defaultValue="" />
+              </label>
+            </div>
             <div>
               <label className="font-mono text-xs text-ink-secondary" htmlFor="email">Email</label>
               <input

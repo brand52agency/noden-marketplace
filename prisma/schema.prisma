@@ -28,7 +28,13 @@ model Operator {
   spendResetAt       DateTime @default(now())
   trialCallsRemaining Int     @default(0) // free first purchase(s); granted only on email verification — see lib/verification.ts and lib/marketplace.ts claimFreeTrial
   emailVerifiedAt    DateTime? // set when the owner proves control of the email; required for any free allowance
-  apiKey             String   @unique
+  // API keys are stored only as a SHA-256 hash; the plaintext is shown once, when it is created.
+  // `apiKey` is the legacy plaintext column: it is nulled when a key is hashed (on first use, or by
+  // scripts/migrate-api-keys.ts), and is dropped once no row holds one.
+  apiKey             String?  @unique
+  apiKeyHash         String?  @unique
+  apiKeyPrefix       String? // first characters of the key, so people can tell their keys apart
+  apiKeyCreatedAt    DateTime?
   createdAt          DateTime @default(now())
 
   allowlist SellerAllowlistEntry[]
@@ -148,4 +154,13 @@ model SellerLead {
   createdAt DateTime @default(now())
 
   @@index([email])
+}
+
+// Sliding-window counters for per-IP / per-network limits (see lib/rate-limit.ts).
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  bucket    String
+  createdAt DateTime @default(now())
+
+  @@index([bucket, createdAt])
 }
