@@ -15,7 +15,10 @@
     "test:retries": "tsx scripts/test-retry-tokens.ts",
     "migrate:order-states": "tsx scripts/migrate-order-states.ts",
     "migrate:api-keys": "tsx scripts/migrate-api-keys.ts",
-    "test:abuse": "tsx scripts/test-abuse-limits.ts"
+    "test:abuse": "tsx scripts/test-abuse-limits.ts",
+    "catalog:check": "tsx scripts/catalog-check.ts",
+    "catalog:run": "tsx scripts/catalog-run.ts",
+    "catalog:build": "tsx scripts/catalog-build.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
