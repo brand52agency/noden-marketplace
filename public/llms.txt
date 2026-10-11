@@ -73,8 +73,9 @@ reachable over Streamable HTTP (no local process to run), exposing:
 - `search_skills(query?, tags?, category?, max_price_sats?)` — returns
   each skill's id, name, description, price in credits and sats, and reputation.
 - `get_skill(skill_id)` — full listing detail.
-- `purchase_skill(skill_id, input, api_key, agent_wallet_connection?)` —
-  same validation/spend-cap enforcement as `POST /api/v1/orders`. If
+- `purchase_skill(skill_id, input, api_key?, agent_wallet_connection?)` —
+  same validation/spend-cap enforcement as `POST /api/v1/orders`. `api_key` may instead be sent
+  once as an `Authorization: Bearer <key>` header on the MCP connection. If
   `agent_wallet_connection` (a `nostr+walletconnect://` URI) is given,
   Noden also asks that wallet to pay the invoice directly over NWC —
   best-effort only; the response tells you whether it worked, and you

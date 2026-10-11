@@ -16,6 +16,13 @@ function errorText(message: string) {
   return { content: [{ type: "text" as const, text: JSON.stringify({ error: message }) }], isError: true };
 }
 
+// The key from "Authorization: Bearer <key>" on the MCP connection, so a chat app's connector settings
+// (Claude "Request headers", Cursor/VS Code "headers") can carry it instead of the model passing it each call.
+function bearerKey(headers?: { get(name: string): string | null }): string | undefined {
+  const m = headers?.get("authorization")?.match(/^Bearer\s+(\S+)$/i);
+  return m?.[1];
+}
+
 export function createMcpServer(ctx: { headers?: { get(name: string): string | null } } = {}) {
   const server = new McpServer({ name: "noden", version: "1.0.0" });
 
@@ -112,9 +119,10 @@ export function createMcpServer(ctx: { headers?: { get(name: string): string | n
         "If the check fails the result is not returned and no sats are sent back: the order status gives a single-use retry_token, " +
         "and passing it here (same skill, same api_key, within 24 hours) runs one free call. " +
         "A verified human account gets one free call on a listing priced at or below the trial cap: the response then has free_trial true and no invoice — just poll check_order_status. Every other purchase returns a Lightning invoice. " +
-        "'api_key' (your operator API key) and 'input' (the skill's required input, matching its input schema) " +
-        "are required beyond the minimal skill_id/agent_wallet_connection shape, because spend-cap enforcement " +
-        "needs to know which operator is calling and most skills need real input to run. " +
+        "Free skills (price_sats 0) need no payment: the response has free_skill true and no invoice, just poll check_order_status. " +
+        "'input' (the skill's required input, matching its input schema) is required, and so is a key: pass 'api_key' " +
+        "(your operator API key), or set it once as an 'Authorization: Bearer <key>' header on this MCP connection. " +
+        "Spend-cap enforcement needs to know which operator is calling. " +
         "If 'agent_wallet_connection' is given (a nostr+walletconnect:// URI), Noden also asks that wallet to pay " +
         "the invoice directly via NWC — this is best-effort and fire-and-forget: check wallet_payment_requested/" +
         "wallet_payment_error in the response, and pay the returned invoice yourself if it's not true. The skill runs " +
@@ -122,7 +130,7 @@ export function createMcpServer(ctx: { headers?: { get(name: string): string | n
       inputSchema: {
         skill_id: z.string(),
         input: z.record(z.string(), z.unknown()).describe("Input matching the skill's input JSON Schema"),
-        api_key: z.string().describe("Your operator API key"),
+        api_key: z.string().optional().describe("Your operator API key. Optional if the connection sends it as an Authorization: Bearer header"),
         agent_wallet_connection: z
           .string()
           .optional()
@@ -135,7 +143,13 @@ export function createMcpServer(ctx: { headers?: { get(name: string): string | n
     },
     async ({ skill_id, input, api_key, agent_wallet_connection, retry_token }) => {
       try {
-        const result = await createOrder(api_key, skill_id, input, agent_wallet_connection, retry_token, { headers: ctx?.headers });
+        const key = api_key?.trim() || bearerKey(ctx.headers);
+        if (!key) {
+          return errorText(
+            "an API key is required: pass api_key, or send 'Authorization: Bearer <key>' on the MCP connection. No key yet? Call create_operator, or sign up at https://shop.getnoden.com/signup."
+          );
+        }
+        const result = await createOrder(key, skill_id, input, agent_wallet_connection, retry_token, { headers: ctx?.headers });
         return text(result);
       } catch (err) {
         if (err instanceof MarketplaceError) return errorText(err.message);
