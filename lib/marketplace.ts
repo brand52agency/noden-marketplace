@@ -8,7 +8,9 @@ import { verifyAgainstSchema } from "@/lib/verify";
 import { fulfillWithUsage, type FulfillmentUsage } from "@/lib/fulfillment";
 import { logAction } from "@/lib/audit";
 import { splitPayout } from "@/lib/fees";
-import { generateApiKey } from "@/lib/api-key";
+import { apiKeyFields, generateApiKey, hashApiKey } from "@/lib/api-key";
+import { keyPauseStatus, notifyKeyPaused } from "@/lib/abuse";
+import { limitByClient, rateLimit } from "@/lib/rate-limit";
 import { REAL_COMPLETED_WHERE } from "@/lib/reputation";
 import { inputTooLarge } from "@/lib/credits";
 import { RETRY_HASH_PREFIX, TRIAL_HASH_PREFIX, isCompleted, isFreeHash, isPending } from "@/lib/order-status";
@@ -16,7 +18,8 @@ import { RETRY_HASH_PREFIX, TRIAL_HASH_PREFIX, isCompleted, isFreeHash, isPendin
 export class MarketplaceError extends Error {
   constructor(
     message: string,
-    public status: number
+    public status: number,
+    public retryAfterSec?: number
   ) {
     super(message);
   }
@@ -32,7 +35,15 @@ function isNewUtcDay(spendResetAt: Date): boolean {
 }
 
 export async function getOperatorByApiKey(apiKey: string) {
-  const operator = await db.operator.findUnique({ where: { apiKey } });
+  let operator = await db.operator.findUnique({ where: { apiKeyHash: hashApiKey(apiKey) } });
+  if (!operator) {
+    // Legacy rows still hold the key in plaintext until they are hashed. Authenticate, then upgrade
+    // the row so the plaintext never survives its first use.
+    const legacy = await db.operator.findUnique({ where: { apiKey } });
+    if (legacy) {
+      operator = await db.operator.update({ where: { id: legacy.id }, data: { ...apiKeyFields(apiKey), apiKey: null } });
+    }
+  }
   if (!operator) {
     throw new MarketplaceError(
       "invalid API key — you don't have access yet. Ask your operator to sign up at https://shop.getnoden.com/signup and give you a valid key.",
@@ -89,6 +100,16 @@ export async function createOrder(
   retryToken?: string
 ) {
   const operator = await getOperatorByApiKey(apiKey);
+
+  // A key that keeps failing its checks is paused until the failures age out (lib/abuse.ts).
+  const pause = await keyPauseStatus(operator.id);
+  if (pause.paused) {
+    await notifyKeyPaused(operator, pause);
+    throw new MarketplaceError(
+      `this API key is paused: ${pause.failures} calls failed their check in the last hour. It resumes automatically in about ${pause.resumesInMinutes} minute(s). Check your inputs against the listing's input schema.`,
+      429
+    );
+  }
 
   const listing = await db.listing.findUnique({ where: { id: listingId } });
   if (!listing || !listing.active) {
@@ -416,12 +437,12 @@ export async function registerSelfServeOperator(requestedSpendCapSats?: number) 
       name: "Self-serve agent",
       allowAllSellers: true,
       spendCapDailySats,
-      apiKey,
+      ...apiKeyFields(apiKey),
     },
   });
 
   return {
-    api_key: operator.apiKey,
+    api_key: apiKey,
     spend_cap_daily_sats: operator.spendCapDailySats,
     free_first_call: false,
     note:
@@ -442,4 +463,21 @@ async function recalcReputation(listingId: string) {
   const disputeRate = orders.filter((o) => !isCompleted(o.status)).length / orders.length;
   const reputation = Math.max(1, Math.min(5, 5 * successRate - disputeRate * 2));
   await db.listing.update({ where: { id: listingId }, data: { successRate, reputation } });
+}
+
+// Anonymous key creation is easy to farm, so it is limited per IP and per network range, plus a
+// global ceiling, and can be switched off outright (ANONYMOUS_REGISTRATION_ENABLED=false).
+export const ANONYMOUS_REGISTRATION_ENABLED = process.env.ANONYMOUS_REGISTRATION_ENABLED !== "false";
+
+export async function registerSelfServeOperatorLimited(headers: { get(name: string): string | null }, requestedSpendCapSats?: number) {
+  if (!ANONYMOUS_REGISTRATION_ENABLED) {
+    throw new MarketplaceError("self-serve key creation is switched off right now; sign up at https://shop.getnoden.com/signup", 503);
+  }
+  const blocked = await limitByClient("register", headers, { perIp: 5, perNetwork: 20, windowSec: 3600 });
+  if (blocked) {
+    throw new MarketplaceError(`too many keys created from your network; try again in ${Math.ceil(blocked.retryAfterSec / 60)} minute(s)`, 429, blocked.retryAfterSec);
+  }
+  const global = await rateLimit("register:global", 300, 3600);
+  if (!global.ok) throw new MarketplaceError("key creation is busy right now; try again shortly", 429, global.retryAfterSec);
+  return registerSelfServeOperator(requestedSpendCapSats);
 }

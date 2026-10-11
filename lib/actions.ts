@@ -4,7 +4,9 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { auth, signIn, signOut } from "@/lib/auth";
-import { generateApiKey } from "@/lib/api-key";
+import { REVOKED_KEY_FIELDS, apiKeyFields, generateApiKey } from "@/lib/api-key";
+import { cookies, headers } from "next/headers";
+import { limitByClient } from "@/lib/rate-limit";
 import { issueRetryToken } from "@/lib/marketplace";
 import { revalidatePath } from "next/cache";
 import { isDisposableEmail } from "@/lib/email-policy";
@@ -15,6 +17,17 @@ export type ActionState = { error?: string } | null;
 export async function signupAction(_prev: ActionState, formData: FormData): Promise<ActionState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
+
+  // Cheap bot checks: a honeypot field people never see, and a form that cannot be submitted
+  // within 2.5 seconds of being rendered. (A CAPTCHA needs third-party keys; add one if abuse continues.)
+  const startedAt = Number(formData.get("formStartedAt") ?? 0);
+  if (String(formData.get("company") ?? "") !== "" || !startedAt || Date.now() - startedAt < 2500) {
+    return { error: "Something looks off with that submission. Wait a moment and try again." };
+  }
+  const blocked = await limitByClient("signup", await headers(), { perIp: 5, perNetwork: 20, windowSec: 3600 });
+  if (blocked) {
+    return { error: `Too many sign-ups from your network. Try again in ${Math.ceil(blocked.retryAfterSec / 60)} minute(s).` };
+  }
 
   if (!email || !password || password.length < 8) {
     return { error: "Enter an email and a password of at least 8 characters." };
@@ -30,9 +43,11 @@ export async function signupAction(_prev: ActionState, formData: FormData): Prom
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
+  const newKey = generateApiKey();
   const operator = await db.operator.create({
-    data: { email, passwordHash, role: "buyer", apiKey: generateApiKey() },
+    data: { email, passwordHash, role: "buyer", ...apiKeyFields(newKey) },
   });
+  await showKeyOnce(newKey);
   // The free first call is granted when the email is confirmed, not at signup.
   await sendVerificationEmail(operator.id);
 
@@ -82,10 +97,33 @@ export async function saveSetupAction(_prev: ActionState, formData: FormData): P
   redirect("/operator/dashboard");
 }
 
+// The plaintext key is never stored, so it is handed to the owner exactly once: in a short-lived
+// HttpOnly cookie that the next page shows and then clears (never in a URL).
+const NEW_KEY_COOKIE = "noden_new_key";
+async function showKeyOnce(key: string) {
+  (await cookies()).set(NEW_KEY_COOKIE, key, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 600,
+  });
+}
+
 export async function regenerateApiKeyAction() {
   const session = await auth();
   if (!session?.user?.id) return;
-  await db.operator.update({ where: { id: session.user.id }, data: { apiKey: generateApiKey() } });
+  const key = generateApiKey();
+  // Writing the new hash replaces (and so revokes) the old key at the same moment.
+  await db.operator.update({ where: { id: session.user.id }, data: { ...apiKeyFields(key), apiKey: null } });
+  await showKeyOnce(key);
+  redirect("/operator/dashboard");
+}
+
+export async function revokeApiKeyAction() {
+  const session = await auth();
+  if (!session?.user?.id) return;
+  await db.operator.update({ where: { id: session.user.id }, data: REVOKED_KEY_FIELDS });
   redirect("/operator/dashboard");
 }
 

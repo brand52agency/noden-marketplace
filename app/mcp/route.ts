@@ -6,7 +6,7 @@ import { createMcpServer } from "@/lib/mcp-server";
 // session across requests). Fine for stdio-less "tool call" usage;
 // each of the four tools is independently idempotent-safe to retry.
 async function handle(request: Request): Promise<Response> {
-  const server = createMcpServer();
+  const server = createMcpServer({ headers: request.headers });
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,

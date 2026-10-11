@@ -9,18 +9,6 @@ export default function SetupForm({ operator }: { operator: Operator }) {
 
   return (
     <div className="mt-8 flex flex-col gap-8">
-      <div className="rounded-lg border border-accent/40 bg-accent-dim p-4">
-        <p className="text-xs uppercase tracking-wider text-accent">Your API key — copy this now</p>
-        <code className="mt-2 block break-all rounded bg-bg px-3 py-2 text-sm text-ink">
-          {operator.apiKey}
-        </code>
-        <p className="mt-2 text-xs text-ink-tertiary">
-          Your agent uses this as <code>api_key</code> (or an{" "}
-          <code>Authorization: Bearer</code> header) to call <code>/api/v1/orders</code> or the MCP{" "}
-          <code>purchase_skill</code> tool. You can regenerate it later from your dashboard.
-        </p>
-      </div>
-
       <form action={formAction} className="flex flex-col gap-6">
         <div>
           <label className="text-sm font-medium text-ink" htmlFor="nwcConnection">

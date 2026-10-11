@@ -2,6 +2,7 @@
 // makes one HTTP-free call into createOrder for the cap check, using a throwaway operator.
 import assert from "node:assert/strict";
 import { db } from "../lib/db";
+import { hashApiKey } from "../lib/api-key";
 import { createOrder, registerSelfServeOperator } from "../lib/marketplace";
 import {
   MAX_INPUT_CHARS,
@@ -99,8 +100,8 @@ async function main() {
     assert.ok(proven413 >= 15, `expected the cap (HTTP 413) to fire on several unbounded listings, fired on ${proven413}`);
     console.log(`PASS createOrder returns 413 for schema-valid oversized input (${proven413} listings exercised)`);
   } finally {
-    await db.order.deleteMany({ where: { buyer: { apiKey: api_key } } });
-    await db.operator.deleteMany({ where: { apiKey: api_key } });
+    await db.order.deleteMany({ where: { buyer: { apiKeyHash: hashApiKey(api_key) } } });
+    await db.operator.deleteMany({ where: { apiKeyHash: hashApiKey(api_key) } });
   }
   await db.$disconnect();
   console.log("\nAll credit-pricing checks passed.");

@@ -2,7 +2,8 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { normalizeOrderStatus } from "@/lib/order-status";
-import { regenerateApiKeyAction } from "@/lib/actions";
+import { regenerateApiKeyAction, revokeApiKeyAction } from "@/lib/actions";
+import { NewKeyBanner } from "@/components/NewKeyBanner";
 import { VerifyEmailNotice } from "@/components/VerifyEmailNotice";
 
 function StatusBadge({ status }: { status: string }) {
@@ -39,6 +40,9 @@ export default async function DashboardPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
       <h1 className="text-2xl font-semibold text-ink">Dashboard</h1>
+      <div className="mt-4 empty:hidden">
+        <NewKeyBanner />
+      </div>
       {!operator.emailVerifiedAt && (
         <div className="mt-4">
           <VerifyEmailNotice email={operator.email} />
@@ -69,13 +73,25 @@ export default async function DashboardPage() {
       <section className="mt-6 rounded-lg bg-surface p-5 border border-border">
         <p className="text-xs uppercase tracking-wider text-ink-tertiary">API key</p>
         <code className="mt-2 block break-all rounded bg-bg border border-border px-3 py-2 text-sm text-ink">
-          {operator.apiKey.slice(0, 8)}{"…".repeat(1)}{operator.apiKey.slice(-4)}
+          {operator.apiKeyPrefix ? `${operator.apiKeyPrefix}…` : "No active key"}
         </code>
-        <form action={regenerateApiKeyAction}>
-          <button type="submit" className="mt-3 text-sm text-accent hover:underline">
-            Regenerate key
-          </button>
-        </form>
+        <p className="mt-2 text-xs text-ink-tertiary">
+          We store only a hash of your key, so it can&apos;t be shown again. Regenerating replaces the current key immediately.
+        </p>
+        <div className="mt-3 flex gap-5">
+          <form action={regenerateApiKeyAction}>
+            <button type="submit" className="text-sm text-accent hover:underline">
+              {operator.apiKeyHash ? "Regenerate key" : "Create a key"}
+            </button>
+          </form>
+          {operator.apiKeyHash && (
+            <form action={revokeApiKeyAction}>
+              <button type="submit" className="text-sm text-fail hover:underline">
+                Revoke key
+              </button>
+            </form>
+          )}
+        </div>
       </section>
 
       <section className="mt-6">
