@@ -66,7 +66,12 @@ export type PricedListing = {
   description?: string | null;
   inputSchema: unknown;
   outputSchema: unknown;
+  // Code-backed skills (lib/skills) make no model call, so the token cost model doesn't apply.
+  handler?: string | null;
 };
+
+// What a code-backed call costs Noden: a few outbound requests and some compute, not tokens.
+const HANDLER_NOMINAL_COST_USD = 0.0005;
 
 // Largest JSON a schema-valid input can be, in characters; Infinity when the schema has no bound.
 export function schemaMaxInputChars(schema: unknown): number {
@@ -121,16 +126,20 @@ function promptTokens(l: PricedListing, inputChars: number): number {
 
 // The most one call can cost: biggest allowed input, output at the max_tokens ceiling.
 export const worstCaseCostUsd = (l: PricedListing) =>
-  costUsd(promptTokens(l, effectiveMaxInputChars(l)), FULFILLMENT_MAX_OUTPUT_TOKENS);
+  l.handler ? HANDLER_NOMINAL_COST_USD : costUsd(promptTokens(l, effectiveMaxInputChars(l)), FULFILLMENT_MAX_OUTPUT_TOKENS);
 
 // An ordinary call: ~1,500 characters of input and a schema-sized output.
 export const typicalCostUsd = (l: PricedListing) =>
-  costUsd(promptTokens(l, Math.min(TYPICAL_INPUT_CHARS, effectiveMaxInputChars(l))), typicalOutputTokens(l.outputSchema));
+  l.handler ? HANDLER_NOMINAL_COST_USD : costUsd(promptTokens(l, Math.min(TYPICAL_INPUT_CHARS, effectiveMaxInputChars(l))), typicalOutputTokens(l.outputSchema));
 
 export const satsToCredits = (sats: number) =>
   Math.ceil((sats / 100_000_000) * REFERENCE_USD_PER_BTC / CREDIT_USD);
 
 export function creditBreakdown(l: PricedListing) {
+  // A free skill costs the buyer nothing; its limits live in lib/free-skills.ts.
+  if (l.handler && l.priceSats === 0) {
+    return { credits: 0, fromSats: 0, fromWorstCase: 0, typicalCostUsd: HANDLER_NOMINAL_COST_USD, worstCaseCostUsd: HANDLER_NOMINAL_COST_USD, floorRevenueUsd: 0, typicalMargin: 1, worstCaseMargin: 1 };
+  }
   const fromSats = satsToCredits(l.priceSats);
   const fromWorstCase = Math.ceil(worstCaseCostUsd(l) / (NET_FLOOR_USD_PER_CREDIT * (1 - MIN_WORST_CASE_MARGIN)));
   const credits = Math.max(MIN_CREDITS_PER_CALL, fromSats, fromWorstCase);
@@ -150,6 +159,7 @@ export function creditBreakdown(l: PricedListing) {
 // The price buyers see. Snapshotted in credit-prices.json so a listing's price only changes
 // when the file is regenerated on purpose; new listings fall back to the same formula.
 export function priceCredits(l: PricedListing): number {
+  if (l.handler && l.priceSats === 0) return 0;
   const snapshot = (prices as { prices: Record<string, number> }).prices[l.id];
   return snapshot ?? creditBreakdown(l).credits;
 }
@@ -158,6 +168,7 @@ export function priceCredits(l: PricedListing): number {
 // priceCredits; the cost-based rule only matters for listings missing from the snapshot, which
 // `npm run credits:generate -- --check` reports.
 export function priceCreditsLite(id: string, priceSats: number): number {
+  if (priceSats === 0) return 0;
   const snapshot = (prices as { prices: Record<string, number> }).prices[id];
   return snapshot ?? Math.max(MIN_CREDITS_PER_CALL, satsToCredits(priceSats));
 }

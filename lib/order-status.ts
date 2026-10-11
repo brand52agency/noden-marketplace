@@ -28,7 +28,10 @@ export function normalizeOrderStatus(s: string): OrderStatus {
 // instead of a Lightning payment hash.
 export const TRIAL_HASH_PREFIX = "trial_";
 export const RETRY_HASH_PREFIX = "retry_";
-export const isFreeHash = (hash: string) => hash.startsWith(TRIAL_HASH_PREFIX) || hash.startsWith(RETRY_HASH_PREFIX);
+// A run of a free (price 0) code-backed skill, see lib/free-skills.ts.
+export const FREE_SKILL_HASH_PREFIX = "freeskill_";
+export const isFreeHash = (hash: string) =>
+  hash.startsWith(TRIAL_HASH_PREFIX) || hash.startsWith(RETRY_HASH_PREFIX) || hash.startsWith(FREE_SKILL_HASH_PREFIX);
 
 // Every stored value that means the given status, old spellings included (for database filters).
 export function valuesFor(status: string): string[] {

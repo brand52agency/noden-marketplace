@@ -1,7 +1,7 @@
 id,type,category,title,slug,audience,related_pack,price,uses_or_source,wave,status
-N001,free prompt,Social media,Turn one customer review into five posts,turn-one-customer-review-into-five-posts,Marketers and small business owners,Social Post Pack,0,,1,drafted
-N002,free prompt,Social media,Weekly post plan from three business updates,weekly-post-plan-from-three-business-updates,Marketers and small business owners,Social Post Pack,0,,1,drafted
-N003,free prompt,Social media,Hook rewriter: ten openers for one post,hook-rewriter-ten-openers-for-one-post,Marketers and small business owners,Social Post Pack,0,,1,drafted
+N001,free prompt,Social media,Turn one customer review into five posts,turn-one-customer-review-into-five-posts,Marketers and small business owners,Social Post Pack,0,,1,published
+N002,free prompt,Social media,Weekly post plan from three business updates,weekly-post-plan-from-three-business-updates,Marketers and small business owners,Social Post Pack,0,,1,published
+N003,free prompt,Social media,Hook rewriter: ten openers for one post,hook-rewriter-ten-openers-for-one-post,Marketers and small business owners,Social Post Pack,0,,1,published
 N004,free prompt,Social media,LinkedIn post from a rough voice note,linkedin-post-from-a-rough-voice-note,Marketers and small business owners,Social Post Pack,0,,2,planned
 N005,free prompt,Social media,Carousel outline from a blog article,carousel-outline-from-a-blog-article,Marketers and small business owners,Social Post Pack,0,,2,planned
 N006,free prompt,Social media,Reply drafts for negative comments,reply-drafts-for-negative-comments,Marketers and small business owners,Social Post Pack,0,,2,planned
@@ -24,9 +24,9 @@ N022,free prompt,Social media,Caption variations for A/B testing,caption-variati
 N023,free prompt,Social media,Employee spotlight post,employee-spotlight-post,Marketers and small business owners,Social Post Pack,0,,5,planned
 N024,free prompt,Social media,Myth-versus-fact post for your industry,myth-versus-fact-post-for-your-industry,Marketers and small business owners,Social Post Pack,0,,5,planned
 N025,free prompt,Social media,Month-end results recap post,month-end-results-recap-post,Marketers and small business owners,Social Post Pack,0,,5,planned
-N026,free prompt,Video and reels,Reel script from a single tip,reel-script-from-a-single-tip,Creators and small business owners,Reel and Short Video Pack,0,,1,drafted
-N027,free prompt,Video and reels,Shot list for a 30-second product demo,shot-list-for-a-30-second-product-demo,Creators and small business owners,Reel and Short Video Pack,0,,1,drafted
-N028,free prompt,Video and reels,Ten hooks for the first three seconds,ten-hooks-for-the-first-three-seconds,Creators and small business owners,Reel and Short Video Pack,0,,1,drafted
+N026,free prompt,Video and reels,Reel script from a single tip,reel-script-from-a-single-tip,Creators and small business owners,Reel and Short Video Pack,0,,1,published
+N027,free prompt,Video and reels,Shot list for a 30-second product demo,shot-list-for-a-30-second-product-demo,Creators and small business owners,Reel and Short Video Pack,0,,1,published
+N028,free prompt,Video and reels,Ten hooks for the first three seconds,ten-hooks-for-the-first-three-seconds,Creators and small business owners,Reel and Short Video Pack,0,,1,published
 N029,free prompt,Video and reels,Talking-head script with on-screen text cues,talking-head-script-with-on-screen-text-cues,Creators and small business owners,Reel and Short Video Pack,0,,2,planned
 N030,free prompt,Video and reels,Turn a blog post into three short videos,turn-a-blog-post-into-three-short-videos,Creators and small business owners,Reel and Short Video Pack,0,,2,planned
 N031,free prompt,Video and reels,B-roll list for a service business,b-roll-list-for-a-service-business,Creators and small business owners,Reel and Short Video Pack,0,,2,planned
@@ -49,9 +49,9 @@ N047,free prompt,Video and reels,Event recap video outline,event-recap-video-out
 N048,free prompt,Video and reels,Before-and-after transformation reel,before-and-after-transformation-reel,Creators and small business owners,Reel and Short Video Pack,0,,5,planned
 N049,free prompt,Video and reels,Storyboard table for a 60-second explainer,storyboard-table-for-a-60-second-explainer,Creators and small business owners,Reel and Short Video Pack,0,,5,planned
 N050,free prompt,Video and reels,Filming checklist for a solo creator,filming-checklist-for-a-solo-creator,Creators and small business owners,Reel and Short Video Pack,0,,5,planned
-N051,free prompt,Email,Welcome email sequence for new subscribers,welcome-email-sequence-for-new-subscribers,Marketers and small business owners,Email Marketing Pack,0,,1,drafted
+N051,free prompt,Email,Welcome email sequence for new subscribers,welcome-email-sequence-for-new-subscribers,Marketers and small business owners,Email Marketing Pack,0,,1,published
 N052,free prompt,Email,Subject line set: ten options with preview text,subject-line-set-ten-options-with-preview-text,Marketers and small business owners,Email Marketing Pack,0,,1,drafted
-N053,free prompt,Email,Win-back email for lapsed customers,win-back-email-for-lapsed-customers,Marketers and small business owners,Email Marketing Pack,0,,1,drafted
+N053,free prompt,Email,Win-back email for lapsed customers,win-back-email-for-lapsed-customers,Marketers and small business owners,Email Marketing Pack,0,,1,published
 N054,free prompt,Email,Newsletter from five bullet points,newsletter-from-five-bullet-points,Marketers and small business owners,Email Marketing Pack,0,,2,planned
 N055,free prompt,Email,Abandoned cart email trio,abandoned-cart-email-trio,Marketers and small business owners,Email Marketing Pack,0,,2,planned
 N056,free prompt,Email,Product launch announcement email,product-launch-announcement-email,Marketers and small business owners,Email Marketing Pack,0,,2,planned
@@ -74,9 +74,9 @@ N072,free prompt,Email,Meeting recap with action items,meeting-recap-with-action
 N073,free prompt,Email,Vendor negotiation email,vendor-negotiation-email,Marketers and small business owners,Email Marketing Pack,0,,5,planned
 N074,free prompt,Email,Out-of-office and auto-reply set,out-of-office-and-auto-reply-set,Marketers and small business owners,Email Marketing Pack,0,,5,planned
 N075,free prompt,Email,"Email tone fixer: firm, warm or brief",email-tone-fixer-firm-warm-or-brief,Marketers and small business owners,Email Marketing Pack,0,,5,planned
-N076,free prompt,SEO and content,Blog outline from a target keyword,blog-outline-from-a-target-keyword,Marketers and site owners,SEO Content Pack,0,,1,drafted
-N077,free prompt,SEO and content,Meta title and description set for a page,meta-title-and-description-set-for-a-page,Marketers and site owners,SEO Content Pack,0,,1,drafted
-N078,free prompt,SEO and content,Content brief for a freelance writer,content-brief-for-a-freelance-writer,Marketers and site owners,SEO Content Pack,0,,1,drafted
+N076,free prompt,SEO and content,Blog outline from a target keyword,blog-outline-from-a-target-keyword,Marketers and site owners,SEO Content Pack,0,,1,published
+N077,free prompt,SEO and content,Meta title and description set for a page,meta-title-and-description-set-for-a-page,Marketers and site owners,SEO Content Pack,0,,1,published
+N078,free prompt,SEO and content,Content brief for a freelance writer,content-brief-for-a-freelance-writer,Marketers and site owners,SEO Content Pack,0,,1,published
 N079,free prompt,SEO and content,FAQ section generator for a service page,faq-section-generator-for-a-service-page,Marketers and site owners,SEO Content Pack,0,,2,planned
 N080,free prompt,SEO and content,Local landing page draft for a city,local-landing-page-draft-for-a-city,Marketers and site owners,SEO Content Pack,0,,2,planned
 N081,free prompt,SEO and content,Refresh plan for an outdated article,refresh-plan-for-an-outdated-article,Marketers and site owners,SEO Content Pack,0,,2,planned
@@ -99,9 +99,9 @@ N097,free prompt,SEO and content,About page rewrite,about-page-rewrite,Marketers
 N098,free prompt,SEO and content,Review response templates with keywords,review-response-templates-with-keywords,Marketers and site owners,SEO Content Pack,0,,5,planned
 N099,free prompt,SEO and content,Topic ideas from customer questions,topic-ideas-from-customer-questions,Marketers and site owners,SEO Content Pack,0,,5,planned
 N100,free prompt,SEO and content,llms.txt draft for your website,llms-txt-draft-for-your-website,Marketers and site owners,SEO Content Pack,0,,5,planned
-N101,free prompt,Sales,Discovery call question list,discovery-call-question-list,Founders and sales teams,Sales Outreach Pack,0,,1,drafted
-N102,free prompt,Sales,Proposal draft from call notes,proposal-draft-from-call-notes,Founders and sales teams,Sales Outreach Pack,0,,1,drafted
-N103,free prompt,Sales,Objection responses for your top five objections,objection-responses-for-your-top-five-objections,Founders and sales teams,Sales Outreach Pack,0,,1,drafted
+N101,free prompt,Sales,Discovery call question list,discovery-call-question-list,Founders and sales teams,Sales Outreach Pack,0,,1,published
+N102,free prompt,Sales,Proposal draft from call notes,proposal-draft-from-call-notes,Founders and sales teams,Sales Outreach Pack,0,,1,published
+N103,free prompt,Sales,Objection responses for your top five objections,objection-responses-for-your-top-five-objections,Founders and sales teams,Sales Outreach Pack,0,,1,published
 N104,free prompt,Sales,Elevator pitch in three lengths,elevator-pitch-in-three-lengths,Founders and sales teams,Sales Outreach Pack,0,,2,planned
 N105,free prompt,Sales,LinkedIn connection and follow-up messages,linkedin-connection-and-follow-up-messages,Founders and sales teams,Sales Outreach Pack,0,,2,planned
 N106,free prompt,Sales,Quote follow-up sequence,quote-follow-up-sequence,Founders and sales teams,Sales Outreach Pack,0,,2,planned
@@ -124,9 +124,9 @@ N122,free prompt,Sales,Testimonial into sales proof points,testimonial-into-sale
 N123,free prompt,Sales,Meeting agenda for a first sales call,meeting-agenda-for-a-first-sales-call,Founders and sales teams,Sales Outreach Pack,0,,5,planned
 N124,free prompt,Sales,Negotiation prep sheet,negotiation-prep-sheet,Founders and sales teams,Sales Outreach Pack,0,,5,planned
 N125,free prompt,Sales,Weekly pipeline review summary,weekly-pipeline-review-summary,Founders and sales teams,Sales Outreach Pack,0,,5,planned
-N126,free prompt,Customer support,Reply drafts from a customer message,reply-drafts-from-a-customer-message,Support teams and business owners,Customer Support Pack,0,,1,drafted
-N127,free prompt,Customer support,Help article from a solved ticket,help-article-from-a-solved-ticket,Support teams and business owners,Customer Support Pack,0,,1,drafted
-N128,free prompt,Customer support,Refund and return response set,refund-and-return-response-set,Support teams and business owners,Customer Support Pack,0,,1,drafted
+N126,free prompt,Customer support,Reply drafts from a customer message,reply-drafts-from-a-customer-message,Support teams and business owners,Customer Support Pack,0,,1,published
+N127,free prompt,Customer support,Help article from a solved ticket,help-article-from-a-solved-ticket,Support teams and business owners,Customer Support Pack,0,,1,published
+N128,free prompt,Customer support,Refund and return response set,refund-and-return-response-set,Support teams and business owners,Customer Support Pack,0,,1,published
 N129,free prompt,Customer support,Angry customer de-escalation reply,angry-customer-de-escalation-reply,Support teams and business owners,Customer Support Pack,0,,2,planned
 N130,free prompt,Customer support,Canned response library starter,canned-response-library-starter,Support teams and business owners,Customer Support Pack,0,,2,planned
 N131,free prompt,Customer support,FAQ page from support inbox themes,faq-page-from-support-inbox-themes,Support teams and business owners,Customer Support Pack,0,,2,planned
@@ -149,9 +149,9 @@ N147,free prompt,Customer support,Late payment reminder series,late-payment-remi
 N148,free prompt,Customer support,Appointment rescheduling messages,appointment-rescheduling-messages,Support teams and business owners,Customer Support Pack,0,,5,planned
 N149,free prompt,Customer support,Complaint log summary for the month,complaint-log-summary-for-the-month,Support teams and business owners,Customer Support Pack,0,,5,planned
 N150,free prompt,Customer support,Translate a reply and keep the tone,translate-a-reply-and-keep-the-tone,Support teams and business owners,Customer Support Pack,0,,5,planned
-N151,free prompt,Operations,Standard operating procedure from a walkthrough,standard-operating-procedure-from-a-walkthrough,Owners and operations leads,,0,,1,drafted
+N151,free prompt,Operations,Standard operating procedure from a walkthrough,standard-operating-procedure-from-a-walkthrough,Owners and operations leads,,0,,1,published
 N152,free prompt,Operations,Meeting notes into decisions and owners,meeting-notes-into-decisions-and-owners,Owners and operations leads,,0,,1,drafted
-N153,free prompt,Operations,Job description from a role summary,job-description-from-a-role-summary,Owners and operations leads,,0,,1,drafted
+N153,free prompt,Operations,Job description from a role summary,job-description-from-a-role-summary,Owners and operations leads,,0,,1,published
 N154,free prompt,Operations,Interview question set by role,interview-question-set-by-role,Owners and operations leads,,0,,2,planned
 N155,free prompt,Operations,New hire first-week plan,new-hire-first-week-plan,Owners and operations leads,,0,,2,planned
 N156,free prompt,Operations,Process checklist from a messy description,process-checklist-from-a-messy-description,Owners and operations leads,,0,,2,planned
@@ -174,9 +174,9 @@ N172,free prompt,Operations,Schedule builder for shift coverage,schedule-builder
 N173,free prompt,Operations,Supplier email to request a quote,supplier-email-to-request-a-quote,Owners and operations leads,,0,,5,planned
 N174,free prompt,Operations,End-of-day shutdown checklist,end-of-day-shutdown-checklist,Owners and operations leads,,0,,5,planned
 N175,free prompt,Operations,Document summary for a busy owner,document-summary-for-a-busy-owner,Owners and operations leads,,0,,5,planned
-N176,free prompt,Founder and strategy,One-page business plan,one-page-business-plan,Founders,Product Launch Pack,0,,1,drafted
-N177,free prompt,Founder and strategy,Positioning statement from customer language,positioning-statement-from-customer-language,Founders,Product Launch Pack,0,,1,drafted
-N178,free prompt,Founder and strategy,Pricing options with trade-offs,pricing-options-with-trade-offs,Founders,Product Launch Pack,0,,1,drafted
+N176,free prompt,Founder and strategy,One-page business plan,one-page-business-plan,Founders,Product Launch Pack,0,,1,published
+N177,free prompt,Founder and strategy,Positioning statement from customer language,positioning-statement-from-customer-language,Founders,Product Launch Pack,0,,1,published
+N178,free prompt,Founder and strategy,Pricing options with trade-offs,pricing-options-with-trade-offs,Founders,Product Launch Pack,0,,1,published
 N179,free prompt,Founder and strategy,Competitor snapshot from their websites,competitor-snapshot-from-their-websites,Founders,Product Launch Pack,0,,2,planned
 N180,free prompt,Founder and strategy,Customer interview guide,customer-interview-guide,Founders,Product Launch Pack,0,,2,planned
 N181,free prompt,Founder and strategy,Offer naming ideas,offer-naming-ideas,Founders,Product Launch Pack,0,,2,planned
@@ -289,13 +289,13 @@ N287,agent recipe,Recipes,Pre-release dependency check,pre-release-dependency-ch
 N288,agent recipe,Recipes,Delivery route address validation,delivery-route-address-validation,Developers running agents,,0 (uses paid skills),Address Geocoding and Normalization,5,planned
 N289,agent recipe,Recipes,Press mention tracker,press-mention-tracker,Developers running agents,,0 (uses paid skills),Web Page to Clean Data,5,planned
 N290,agent recipe,Recipes,New site launch readiness check,new-site-launch-readiness-check,Developers running agents,,0 (uses paid skills),Agent-Readiness Check; Sitemap and Broken Link Crawler; Screenshot and Page-to-PDF Capture,5,planned
-N291,skill,Skills,Agent-Readiness Check,agent-readiness-check,Agents and developers,,0 (free),"Fetches the site's own files: llms.txt, robots.txt, sitemap, structured data",1,planned
-N292,skill,Skills,Web Page to Clean Data,web-page-to-clean-data,Agents and developers,,0 (free),Fetches and parses the target page,1,planned
+N291,skill,Skills,Agent-Readiness Check,agent-readiness-check,Agents and developers,,0 (free),"Fetches the site's own files: llms.txt, robots.txt, sitemap, structured data",1,published
+N292,skill,Skills,Web Page to Clean Data,web-page-to-clean-data,Agents and developers,,0 (free),Fetches and parses the target page,1,published
 N293,skill,Skills,Receipt and Invoice to JSON,receipt-and-invoice-to-json,Agents and developers,,0 (free),"OCR and extraction on the uploaded file, totals checked",1,planned
-N294,skill,Skills,Sitemap and Broken Link Crawler,sitemap-and-broken-link-crawler,Agents and developers,,TBD above cost,Crawls the site and requests each link,3,planned
-N295,skill,Skills,Domain Availability and DNS Lookup,domain-availability-and-dns-lookup,Agents and developers,,TBD above cost,Registry (RDAP) and DNS queries,3,planned
-N296,skill,Skills,Live FX and Currency Conversion,live-fx-and-currency-conversion,Agents and developers,,TBD above cost,"A published exchange-rate feed, with the rate date returned",3,planned
+N294,skill,Skills,Sitemap and Broken Link Crawler,sitemap-and-broken-link-crawler,Agents and developers,,TBD above cost,Crawls the site and requests each link,3,published
+N295,skill,Skills,Domain Availability and DNS Lookup,domain-availability-and-dns-lookup,Agents and developers,,TBD above cost,Registry (RDAP) and DNS queries,3,published
+N296,skill,Skills,Live FX and Currency Conversion,live-fx-and-currency-conversion,Agents and developers,,TBD above cost,"A published exchange-rate feed, with the rate date returned",3,published
 N297,skill,Skills,Address Geocoding and Normalization,address-geocoding-and-normalization,Agents and developers,,TBD above cost,A geocoding service or open address data,4,planned
-N298,skill,Skills,Dependency CVE Lookup,dependency-cve-lookup,Agents and developers,,TBD above cost,A public vulnerability database such as OSV,4,planned
+N298,skill,Skills,Dependency CVE Lookup,dependency-cve-lookup,Agents and developers,,TBD above cost,A public vulnerability database such as OSV,4,published
 N299,skill,Skills,Audio and Video Transcription,audio-and-video-transcription,Agents and developers,,TBD above cost,A speech-to-text model run on the uploaded file,4,planned
 N300,skill,Skills,Screenshot and Page-to-PDF Capture,screenshot-and-page-to-pdf-capture,Agents and developers,,TBD above cost,A headless browser render of the page,5,planned

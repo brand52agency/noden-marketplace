@@ -38,11 +38,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const retryToken = typeof body?.retry_token === "string" ? body.retry_token : undefined;
-    const result = await createOrder(apiKey, listingId, input, undefined, retryToken);
-    return NextResponse.json(result, { status: "free_trial" in result || "free_retry" in result ? 201 : 402 });
+    const result = await createOrder(apiKey, listingId, input, undefined, retryToken, { headers: request.headers });
+    return NextResponse.json(result, { status: "free_trial" in result || "free_retry" in result || "free_skill" in result ? 201 : 402 });
   } catch (err) {
     if (err instanceof MarketplaceError) {
-      return NextResponse.json({ error: err.message }, { status: err.status });
+      return NextResponse.json({ error: err.message }, { status: err.status, headers: err.retryAfterSec ? { "Retry-After": String(err.retryAfterSec) } : undefined });
     }
     console.error(err);
     return NextResponse.json({ error: "order creation failed" }, { status: 500 });

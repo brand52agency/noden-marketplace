@@ -27,13 +27,13 @@ async function main() {
   const listings = await db.listing.findMany({
     where: { active: true },
     orderBy: [{ priceSats: "asc" }, { name: "asc" }],
-    select: { id: true, name: true, category: true, priceSats: true, details: true, description: true, inputSchema: true, outputSchema: true },
+    select: { id: true, name: true, category: true, priceSats: true, details: true, description: true, inputSchema: true, outputSchema: true, handler: true },
   });
 
   const rows = listings.map((l) => ({ l, b: creditBreakdown(l), unbounded: !Number.isFinite(schemaMaxInputChars(l.inputSchema)) }));
   const problems: string[] = [];
   for (const { l, b } of rows) {
-    if (b.credits < MIN_CREDITS_PER_CALL) problems.push(`${l.name}: below minimum credits`);
+    if (b.credits < MIN_CREDITS_PER_CALL && l.priceSats > 0) problems.push(`${l.name}: below minimum credits`);
     if (b.worstCaseMargin < MIN_WORST_CASE_MARGIN - 1e-9) problems.push(`${l.name}: worst-case margin ${pct(b.worstCaseMargin)} < ${pct(MIN_WORST_CASE_MARGIN)}`);
     if (b.typicalMargin < MIN_TYPICAL_MARGIN) problems.push(`${l.name}: typical margin ${pct(b.typicalMargin)} < ${pct(MIN_TYPICAL_MARGIN)}`);
   }

@@ -22,7 +22,7 @@ async function expect401(p: Promise<unknown>, label: string) {
 }
 
 async function main() {
-  const listing = await db.listing.findFirstOrThrow({ where: { active: true }, select: { id: true, sellerId: true } });
+  const listing = await db.listing.findFirstOrThrow({ where: { active: true, handler: null }, select: { id: true, sellerId: true } });
 
   try {
     // 1. New keys are stored only as hashes.

@@ -31,6 +31,12 @@ use this service programmatically, without a human in the loop.
    If status is `failed`, the output is not returned; the response includes a
    `retryToken`: send it as `retry_token` in the next `POST /api/v1/orders`
    (same listing, same key, within 24 hours) for one free call.
+5. **Free skills** have `price_sats: 0` and need no payment: `POST /api/v1/orders` returns HTTP 201
+   with `free_skill: true`; poll for the result. Limits: 25 runs a day per verified account, 5 a day per
+   IP for anonymous keys (HTTP 429 with `Retry-After` past that). Some skills (for example Domain
+   Availability and DNS Lookup, Live FX, Dependency CVE Lookup, Web Page to Clean Data, Agent-Readiness
+   Check, Sitemap and Broken Link Crawler) perform a real lookup against the live source instead of
+   asking a model, and refuse private or internal addresses (HTTP 422).
 
 ## Pricing
 
