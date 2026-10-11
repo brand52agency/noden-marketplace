@@ -10,7 +10,8 @@
     "postinstall": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "credits:generate": "tsx scripts/generate-credit-prices.ts",
-    "test:credits": "tsx scripts/test-credit-pricing.ts"
+    "test:credits": "tsx scripts/test-credit-pricing.ts",
+    "test:orders": "tsx scripts/test-order-view.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

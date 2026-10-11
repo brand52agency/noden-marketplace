@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { getOrderStatus, MarketplaceError } from "@/lib/marketplace";
+import { presentOrder } from "@/lib/order-view";
 
 export async function GET(_request: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   try {
     const order = await getOrderStatus(id);
-    return NextResponse.json({ order });
+    return NextResponse.json({ order: presentOrder(order) });
   } catch (err) {
     if (err instanceof MarketplaceError) {
       return NextResponse.json({ error: err.message }, { status: err.status });

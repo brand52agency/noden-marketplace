@@ -3,6 +3,7 @@ import { z } from "zod";
 import { searchListings } from "@/lib/search";
 import { db } from "@/lib/db";
 import { priceCredits } from "@/lib/credits";
+import { presentOrder } from "@/lib/order-view";
 import { createOrder, getOrderStatus, registerSelfServeOperator, MarketplaceError } from "@/lib/marketplace";
 import { outputFieldNames } from "@/lib/schema-preview";
 import { describeReputation, REAL_COMPLETED_WHERE } from "@/lib/reputation";
@@ -142,7 +143,7 @@ export function createMcpServer() {
     async ({ order_id }) => {
       try {
         const order = await getOrderStatus(order_id);
-        return text({ order });
+        return text({ order: presentOrder(order) });
       } catch (err) {
         if (err instanceof MarketplaceError) return errorText(err.message);
         return errorText("could not check order status");
