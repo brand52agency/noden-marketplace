@@ -25,6 +25,14 @@ export default async function SetupPage() {
         <NewKeyBanner />
       </div>
 
+      <p className="mt-4 text-sm text-ink-secondary">
+        New to agents?{" "}
+        <a href="https://getnoden.com/get-an-agent" className="text-accent underline underline-offset-2">
+          See how to connect Noden to the chat app you already use
+        </a>
+        .
+      </p>
+
       <SetupForm operator={operator!} />
     </main>
   );
