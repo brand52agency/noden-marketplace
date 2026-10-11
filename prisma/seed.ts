@@ -2039,7 +2039,7 @@ async function main() {
       const createdAt = i < 4 ? daysAgo(0) : daysAgo(Math.floor(Math.random() * 29) + 1);
 
       const roll = Math.random();
-      const status = roll < 0.72 ? "settled" : roll < 0.85 ? "disputed" : roll < 0.93 ? "refunded" : "pending_payment";
+      const status = roll < 0.72 ? "completed" : roll < 0.85 ? "failed" : roll < 0.93 ? "refunded" : "pending";
 
       const data: Prisma.OrderCreateInput = {
         buyer: { connect: { id: buyer.id } },
@@ -2053,7 +2053,7 @@ async function main() {
         createdAt,
       };
 
-      if (status === "settled") {
+      if (status === "completed") {
         data.output = demoOutput(listing.name) as Prisma.InputJsonValue;
         data.verificationResult = "pass";
         // No third-party seller registered yet — see lib/fees.ts — so the
@@ -2061,7 +2061,7 @@ async function main() {
         data.platformFeeSats = listing.priceSats;
         data.paidAt = createdAt;
         data.settledAt = new Date(createdAt.getTime() + 2000 + Math.random() * 6000);
-      } else if (status === "disputed") {
+      } else if (status === "failed") {
         data.output = demoOutput(listing.name) as Prisma.InputJsonValue;
         data.verificationResult = "fail";
         data.failureNote = "Output failed schema verification against the listing's outputSchema.";
@@ -2090,17 +2090,17 @@ async function main() {
           createdAt,
         },
       });
-      if (status === "settled" || status === "disputed") {
+      if (status === "completed" || status === "failed") {
         await db.auditLogEntry.create({
           data: {
             operatorId: buyer.id,
             action: "verification",
-            detail: { orderId: order.id, pass: status === "settled" } as Prisma.InputJsonValue,
+            detail: { orderId: order.id, pass: status === "completed" } as Prisma.InputJsonValue,
             createdAt: order.settledAt ?? createdAt,
           },
         });
       }
-      if (status === "disputed") {
+      if (status === "failed") {
         await db.auditLogEntry.create({
           data: {
             operatorId: buyer.id,
@@ -2148,11 +2148,11 @@ async function main() {
 
 async function recalcAllReputations(listingIds: string[]) {
   for (const listingId of listingIds) {
-    const orders = await db.order.findMany({ where: { listingId, status: { in: ["settled", "disputed", "refunded"] } } });
+    const orders = await db.order.findMany({ where: { listingId, status: { in: ["completed", "failed", "refunded"] } } });
     if (orders.length === 0) continue;
-    const settled = orders.filter((o) => o.status === "settled").length;
+    const settled = orders.filter((o) => o.status === "completed").length;
     const successRate = settled / orders.length;
-    const disputeRate = orders.filter((o) => o.status !== "settled").length / orders.length;
+    const disputeRate = orders.filter((o) => o.status !== "completed").length / orders.length;
     const reputation = Math.max(1, Math.min(5, 5 * successRate - disputeRate * 2));
     await db.listing.update({ where: { id: listingId }, data: { successRate, reputation } });
   }

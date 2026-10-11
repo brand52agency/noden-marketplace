@@ -102,7 +102,7 @@ model Order {
   amountSats         Int
   railInvoiceRef     String // bolt11 payment_request string
   railPaymentHash    String    @unique // LNbits payment hash, used to poll/webhook status
-  status             String // "pending_payment" | "paid" | "delivered" | "verified" | "disputed" | "refunded" | "settled"
+  status             String // "pending" | "completed" | "failed" | "refunded" (legacy rows may hold pending_payment/paid/settled/disputed until migrated; see lib/order-status.ts)
   output             Json?
   verificationResult String? // "pass" | "fail"
   failureNote        String?
@@ -110,6 +110,15 @@ model Order {
   createdAt          DateTime  @default(now())
   paidAt             DateTime?
   settledAt          DateTime?
+
+  // A failed check never returns sats. It issues a single-use retry token instead: one free call
+  // of the same listing within 24 hours. A retry order points back at the order it retries, and
+  // retryDepth counts how many free retries deep it is (capped, see MAX_RETRIES_PER_PAYMENT).
+  retryToken          String?   @unique
+  retryTokenExpiresAt DateTime?
+  retryTokenUsedAt    DateTime?
+  retryOfOrderId      String?
+  retryDepth          Int       @default(0)
 }
 
 model AuditLogEntry {

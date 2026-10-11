@@ -55,7 +55,7 @@ export function renderListingMarkdown(l: MarkdownListing): string {
     "",
     "1. Get an API key (no human signup): `POST " + SITE + "/api/v1/operators`",
     `2. \`POST ${SITE}/api/v1/orders\` with \`Authorization: Bearer <key>\` and body \`{"listing_id": "${l.id}", "input": { ... }}\``,
-    `3. Poll \`GET ${SITE}/api/v1/orders/{order_id}\` until \`status\` is \`settled\`; the verified output is included.`,
+    `3. Poll \`GET ${SITE}/api/v1/orders/{order_id}\` until \`status\` is \`completed\`; the verified output is included. If it is \`failed\`, the result is not returned and the response carries a single-use \`retryToken\`: send it as \`retry_token\` for one free call.`,
     "",
     `Or use the MCP server at ${SITE}/mcp (\`get_skill\`, \`purchase_skill\`). Full API: ${SITE}/openapi.json`,
     "",

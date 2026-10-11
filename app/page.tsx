@@ -19,7 +19,7 @@ import { inputFieldNames } from "@/lib/schema-preview";
 export const metadata: Metadata = {
   title: "Marketplace — Noden Agent Shop",
   description:
-    "Browse live capabilities AI agents can buy right now — search by category, price, and reputation. Paid over Bitcoin Lightning, held in escrow until output is verified.",
+    "Browse live capabilities AI agents can buy right now — search by category, price, and reputation. Paid per call over Bitcoin Lightning, with every result checked against the skill's output schema.",
 };
 
 type Sort = "reputation" | "newest" | "price_asc" | "trades";

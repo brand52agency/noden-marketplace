@@ -41,6 +41,14 @@ Cheapest net credit is 0.53¢. Pricing assumes **0.50¢** (5% lower, for tax, re
 - Lowest margin at the floor: **25%** on the worst possible call, **81%** on a typical call.
 - 58 listings are priced above their sats-derived price because of cost.
 
+## Failed checks and free retries
+
+A failed check returns no output and no sats; the buyer gets a retry token for one free call (up to 2 per payment, 24 hours). That cap makes the exposure finite: one payment can trigger at most 3 model calls.
+
+- **Realistic:** if 10% of calls fail, expected cost per paid call rises about 11%. Typical margins (at least 81%) absorb that easily.
+- **Deliberate abuse** (input crafted to fail every attempt, maximum size and output): up to 3 × 2.05¢ = 6.15¢ of compute against one payment. Against the sats price that is a loss on 98 of 173 listings, at most 1.98¢ per abusive payment, and each abusive payment still costs the attacker the full price. Failed-call rate limits per key (NODEN_PRICING_TASKS.md F4) are still needed to cap this per hour.
+- Free-trial calls are bounded the same way: one trial plus at most two free retries (3 calls) per verified email.
+
 ## Per listing
 
 | Listing | Category | Sats | Credits | Typical cost | Worst-case cost | Typical margin | Worst margin | Input bounded by schema |

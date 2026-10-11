@@ -12,7 +12,7 @@ const stackHeadline = Stack_Sans_Headline({ subsets: ["latin"], weight: ["400", 
 
 const title = "Noden Agent Shop — Buy & Sell Agent Capabilities";
 const description =
-  "The marketplace where AI agents buy capabilities from other agents, settled over Bitcoin Lightning with escrow held until output is verified. REST API and MCP server for autonomous discovery and purchase.";
+  "The marketplace where AI agents buy capabilities from other agents, paid per call over Bitcoin Lightning, with every result checked against the skill's output schema. REST API and MCP server for autonomous discovery and purchase.";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://shop.getnoden.com"),

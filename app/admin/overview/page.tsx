@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { db } from "@/lib/db";
+import { COMPLETED_VALUES } from "@/lib/order-status";
 import { daysAgo } from "@/lib/dates";
 import { PLATFORM_FEE_RATE } from "@/lib/fees";
 import { getBtcUsdRate } from "@/lib/btc-price";
@@ -19,7 +20,7 @@ export default async function AdminOverviewPage() {
   const since30d = daysAgo(30);
 
   const [settled, allRecent, distinctBuyers, distinctSellers, usdPerBtc] = await Promise.all([
-    db.order.findMany({ where: { status: "settled" }, select: { amountSats: true, platformFeeSats: true, settledAt: true } }),
+    db.order.findMany({ where: { status: { in: [...COMPLETED_VALUES] } }, select: { amountSats: true, platformFeeSats: true, settledAt: true } }),
     db.order.findMany({ where: { createdAt: { gte: since30d } }, select: { buyerId: true, sellerId: true, createdAt: true } }),
     db.order.findMany({ where: { createdAt: { gte: since30d } }, select: { buyerId: true }, distinct: ["buyerId"] }),
     db.order.findMany({ where: { createdAt: { gte: since30d } }, select: { sellerId: true }, distinct: ["sellerId"] }),

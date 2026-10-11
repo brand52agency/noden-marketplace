@@ -103,15 +103,17 @@ export function createMcpServer() {
     {
       description:
         "Purchase a skill. Validates input against the listing's schema and the caller's spend cap/allowlist, " +
-        "then returns a Lightning invoice to pay and holds the order in escrow pending payment and delivery. " +
+        "then returns a Lightning invoice for the exact price of one call; once the invoice is paid the skill runs and the result is checked against the listing's output schema. " +
+        "If the check fails the result is not returned and no sats are sent back: the order status gives a single-use retry_token, " +
+        "and passing it here (same skill, same api_key, within 24 hours) runs one free call. " +
         "A verified human account gets one free call on a listing priced at or below the trial cap: the response then has free_trial true and no invoice — just poll check_order_status. Every other purchase returns a Lightning invoice. " +
         "'api_key' (your operator API key) and 'input' (the skill's required input, matching its input schema) " +
         "are required beyond the minimal skill_id/agent_wallet_connection shape, because spend-cap enforcement " +
         "needs to know which operator is calling and most skills need real input to run. " +
         "If 'agent_wallet_connection' is given (a nostr+walletconnect:// URI), Noden also asks that wallet to pay " +
         "the invoice directly via NWC — this is best-effort and fire-and-forget: check wallet_payment_requested/" +
-        "wallet_payment_error in the response, and pay the returned invoice yourself if it's not true. Escrow release " +
-        "is always driven by Noden detecting the payment on the invoice, never by the wallet-push call succeeding.",
+        "wallet_payment_error in the response, and pay the returned invoice yourself if it's not true. The skill runs " +
+        "only once Noden itself detects the payment on the invoice, never because the wallet-push call succeeded.",
       inputSchema: {
         skill_id: z.string(),
         input: z.record(z.string(), z.unknown()).describe("Input matching the skill's input JSON Schema"),
@@ -120,11 +122,15 @@ export function createMcpServer() {
           .string()
           .optional()
           .describe("Optional nostr+walletconnect:// URI — if given, Noden asks this wallet to pay the invoice"),
+        retry_token: z
+          .string()
+          .optional()
+          .describe("A retry_token from a failed order of this same skill: runs one free call instead of returning an invoice"),
       },
     },
-    async ({ skill_id, input, api_key, agent_wallet_connection }) => {
+    async ({ skill_id, input, api_key, agent_wallet_connection, retry_token }) => {
       try {
-        const result = await createOrder(api_key, skill_id, input, agent_wallet_connection);
+        const result = await createOrder(api_key, skill_id, input, agent_wallet_connection, retry_token);
         return text(result);
       } catch (err) {
         if (err instanceof MarketplaceError) return errorText(err.message);
@@ -137,7 +143,7 @@ export function createMcpServer() {
     "check_order_status",
     {
       description:
-        "Poll an order's status. Once status is 'settled' or 'disputed', the delivered output and verification result are included.",
+        "Poll an order's status: pending, completed or failed. Once completed, the output and verification result are included. If failed, the result is not returned and a retry_token (one free call, 24 hours) is included.",
       inputSchema: { order_id: z.string() },
     },
     async ({ order_id }) => {

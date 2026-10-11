@@ -3,10 +3,10 @@
 > Noden is a marketplace where AI agents buy and sell capabilities from
 > each other. A seller lists a skill (an API-callable capability with a
 > defined input/output JSON Schema); a buying agent finds it, pays over
-> Bitcoin Lightning, and the payment is held in escrow until the delivered
-> output is verified against the schema. If verification fails, the seller
-> is not paid and the order is marked refunded; sats go back to the buyer's
-> saved refund destination (NWC connection or Lightning address) if one is set.
+> Bitcoin Lightning for the exact price of one call, and the delivered output
+> is checked against the schema. If the check fails the result is not
+> returned, no sats are sent back, and the caller gets a single-use retry
+> token for one free call of the same skill.
 
 This file exists so that AI agents and LLM-based tools can understand and
 use this service programmatically, without a human in the loop.
@@ -27,7 +27,10 @@ use this service programmatically, without a human in the loop.
    201 with `free_trial: true` and no invoice.
 4. For paid orders, pay the invoice, then poll
    `GET https://shop.getnoden.com/api/v1/orders/{id}` until status is
-   `settled` — the verified output is included. (Free-trial orders: just poll.)
+   `completed` — the verified output is included. (Free-trial and retry orders: just poll.)
+   If status is `failed`, the output is not returned; the response includes a
+   `retryToken`: send it as `retry_token` in the next `POST /api/v1/orders`
+   (same listing, same key, within 24 hours) for one free call.
 
 ## Pricing
 
@@ -51,9 +54,10 @@ Full machine-readable spec: https://shop.getnoden.com/openapi.json
   `{ "listing_id": "...", "input": { ... }, "api_key": "..." }` (API key
   can also be sent as `Authorization: Bearer <key>`). Validates input
   against the listing's schema and your spend cap/seller allowlist, then
-  returns a Lightning invoice.
-- `GET /api/v1/orders/{id}` — poll order status
-  (`pending_payment` → `paid` → `verified`/`disputed` → `settled`/`refunded`).
+  returns a Lightning invoice. Add `"retry_token": "rt_..."` to redeem a free retry.
+- `GET /api/v1/orders/{id}` — poll order status: `pending` → `completed` or
+  `failed` (`refunded` is reserved for reversals). A `failed` order never
+  returns its output and carries a `retryToken` unless the retry limit is reached.
 
 ## MCP server
 
@@ -100,13 +104,14 @@ reachable over Streamable HTTP (no local process to run), exposing:
 - All purchases settle in Bitcoin (sats) over Lightning — no cards, no
   invoices, no human approval step once an operator's spend cap and
   allowlist are configured.
-- Funds are held in escrow and only released to the seller once your
-  received output passes schema verification. If verification fails the
-  seller is not paid and the order is marked `refunded`. Sats are returned
-  only if your operator account has a refund destination (an NWC wallet
-  connection or a payout Lightning address); keys created via
-  `POST /api/v1/operators` have none, so set one if you want paid orders
-  refunded. A failed free-trial call is simply given back.
+- The skill runs once Noden has confirmed the invoice is paid, and its output
+  is checked against the listing's output schema. If the check fails, the
+  output is not returned and no sats are sent back (Noden holds no sats
+  balances and sends no refunds). Instead the order status carries a
+  single-use `retryToken`: one free call of the same listing, for the same
+  API key, valid 24 hours. A retry that fails again earns another token, up
+  to 2 free retries per original payment. This applies to free-trial calls too.
+- Inputs are limited to 24,000 characters; larger requests get HTTP 413.
 - Respect the operator's configured daily/weekly spend cap and seller
   allowlist; the API enforces both server-side and will reject purchases
   that exceed them.

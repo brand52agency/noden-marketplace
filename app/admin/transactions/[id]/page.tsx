@@ -1,15 +1,14 @@
 import { notFound } from "next/navigation";
 import { CheckCircle2, Circle, XCircle } from "lucide-react";
 import { db } from "@/lib/db";
-import { adminRefundAction } from "@/lib/actions";
+import { adminIssueRetryAction } from "@/lib/actions";
+import { isFailed, isCompleted, normalizeOrderStatus } from "@/lib/order-status";
 import { getBtcUsdRate } from "@/lib/btc-price";
 import Amount from "@/components/Amount";
 
 const LIFECYCLE = [
-  { key: "pending_payment", label: "Awaiting payment" },
-  { key: "paid", label: "Paid" },
-  { key: "verified", label: "Output verified" },
-  { key: "settled", label: "Settled" },
+  { key: "pending", label: "Awaiting payment or result" },
+  { key: "completed", label: "Result passed its check" },
 ] as const;
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -23,10 +22,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   ]);
   if (!order) notFound();
 
-  const failed = order.status === "disputed" || order.status === "refunded";
+  const failed = isFailed(order.status) || order.status === "refunded";
   const stageIndex = failed
-    ? 2 // stalled at "verified" (failed)
-    : LIFECYCLE.findIndex((s) => s.key === order.status);
+    ? 1 // the check at the end of the lifecycle failed
+    : isCompleted(order.status)
+      ? 1
+      : 0;
 
   return (
       <main className="mx-auto max-w-3xl px-6 py-10">
@@ -47,7 +48,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   <Circle className="h-4 w-4 shrink-0 text-border" strokeWidth={2.5} />
                 )}
                 <span className={done || isFailedStage ? "text-ink" : "text-ink-tertiary"}>
-                  {isFailedStage ? `${stage.label} — ${order.status}` : stage.label}
+                  {isFailedStage ? `${stage.label} — ${normalizeOrderStatus(order.status)}` : stage.label}
                 </span>
               </div>
             );
@@ -89,11 +90,14 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           <p className="mt-4 text-sm text-fail">{order.failureNote}</p>
         )}
 
-        {order.status === "disputed" && (
-          <form action={async () => { "use server"; await adminRefundAction(order.id); }} className="mt-6">
+        {isFailed(order.status) && (
+          <form action={async () => { "use server"; await adminIssueRetryAction(order.id); }} className="mt-6">
             <button type="submit" className="rounded-lg bg-fail-bg px-4 py-2 text-sm text-fail hover:opacity-80">
-              Issue refund to buyer
+              Issue a free retry token to the buyer
             </button>
+            <p className="mt-2 text-xs text-ink-tertiary">
+              {order.retryToken ? `A retry token exists for this order (${order.retryTokenUsedAt ? "used" : "unused"}).` : "No retry token has been issued yet."}
+            </p>
           </form>
         )}
       </main>

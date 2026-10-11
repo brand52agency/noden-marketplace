@@ -1,20 +1,21 @@
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { normalizeOrderStatus } from "@/lib/order-status";
 import { regenerateApiKeyAction } from "@/lib/actions";
 import { VerifyEmailNotice } from "@/components/VerifyEmailNotice";
 
 function StatusBadge({ status }: { status: string }) {
+  const shown = normalizeOrderStatus(status);
   const tone: Record<string, string> = {
-    settled: "text-success bg-success-bg",
-    disputed: "text-fail bg-fail-bg",
+    completed: "text-success bg-success-bg",
+    failed: "text-fail bg-fail-bg",
     refunded: "text-ink-secondary bg-surface-raised",
-    pending_payment: "text-accent bg-accent-dim",
-    paid: "text-accent bg-accent-dim",
+    pending: "text-accent bg-accent-dim",
   };
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs ${tone[status] ?? "text-ink-secondary bg-surface-raised"}`}>
-      {status.replace("_", " ")}
+    <span className={`rounded-full px-2 py-0.5 text-xs ${tone[shown]}`}>
+      {shown}
     </span>
   );
 }

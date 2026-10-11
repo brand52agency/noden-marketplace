@@ -51,9 +51,9 @@ function makeNwcRequestEvent(pubkey: string, secretKey: Uint8Array, invoice: str
  * LNbits directly. This function only exists to save the caller the step
  * of paying the invoice through some other channel; if the relay is
  * unreachable, the wallet is offline, or the connection string is bad,
- * the order simply stays pending_payment — the same failure mode as if
+ * the order simply stays pending — the same failure mode as if
  * the agent had been handed the invoice and never paid it. Nothing about
- * escrow, verification, or spend-cap enforcement depends on this succeeding.
+ * running the skill, verification, or spend-cap enforcement depends on this succeeding.
  */
 export async function requestWalletPayment(connectionString: string, invoice: string): Promise<NwcPushResult> {
   let conn: ReturnType<typeof parseConnectionString>;

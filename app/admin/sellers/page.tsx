@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { isCompleted, isFailed } from "@/lib/order-status";
 import { getBtcUsdRate } from "@/lib/btc-price";
 import Amount from "@/components/Amount";
 
@@ -11,8 +12,8 @@ export default async function AdminSellersPage() {
   const rows = await Promise.all(
     sellers.map(async (seller) => {
       const orders = await db.order.findMany({ where: { sellerId: seller.id } });
-      const settled = orders.filter((o) => o.status === "settled");
-      const disputed = orders.filter((o) => o.status === "disputed" || o.status === "refunded");
+      const settled = orders.filter((o) => isCompleted(o.status));
+      const disputed = orders.filter((o) => isFailed(o.status) || o.status === "refunded");
       const revenue = settled.reduce((sum, o) => sum + o.amountSats, 0);
       const avgReputation = seller.listings.length
         ? seller.listings.reduce((s, l) => s + l.reputation, 0) / seller.listings.length

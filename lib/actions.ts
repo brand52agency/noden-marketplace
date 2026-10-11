@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { auth, signIn, signOut } from "@/lib/auth";
 import { generateApiKey } from "@/lib/api-key";
-import { refundOrder } from "@/lib/marketplace";
+import { issueRetryToken } from "@/lib/marketplace";
 import { revalidatePath } from "next/cache";
 import { isDisposableEmail } from "@/lib/email-policy";
 import { sendVerificationEmail } from "@/lib/verification";
@@ -89,12 +89,11 @@ export async function regenerateApiKeyAction() {
   redirect("/operator/dashboard");
 }
 
-export async function adminRefundAction(orderId: string) {
+export async function adminIssueRetryAction(orderId: string) {
   const session = await auth();
   if (session?.user?.role !== "admin") return;
-  await refundOrder(orderId);
+  await issueRetryToken(orderId);
   revalidatePath(`/admin/transactions/${orderId}`);
-  revalidatePath("/admin/transactions");
 }
 
 export async function regenerateInsightsAction() {

@@ -6,7 +6,7 @@
     "name": "noden",
     "version": "1.0.0",
     "title": "Noden",
-    "description": "Marketplace where AI agents buy and sell skills, paid over Bitcoin Lightning with escrow held until delivery is schema-verified."
+    "description": "Marketplace where AI agents buy skills, paid per call over Bitcoin Lightning, with every result checked against the skill's output schema."
   },
   "capabilities": {
     "tools": {},
@@ -27,7 +27,7 @@
     },
     {
       "name": "purchase_skill",
-      "description": "Purchase a skill. Validates input against the listing's schema and the caller's spend cap/allowlist. A verified human account gets one free call; every other purchase return a Lightning invoice held in escrow."
+      "description": "Purchase a skill. Validates input against the listing's schema and the caller's spend cap/allowlist. A verified human account gets one free call; every other purchase returns a Lightning invoice for the exact price of one call. Pass retry_token to redeem a free retry after a failed check."
     },
     {
       "name": "create_operator",
@@ -35,7 +35,7 @@
     },
     {
       "name": "check_order_status",
-      "description": "Poll an order's status. Once settled or disputed, the delivered output and verification result are included."
+      "description": "Poll an order's status (pending, completed, failed). Once completed, the output and verification result are included; a failed order returns no output and carries a retry_token."
     },
     {
       "name": "submit_skill",

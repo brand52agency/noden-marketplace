@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { valuesFor } from "@/lib/order-status";
 import { Prisma } from "@prisma/client";
 import { getBtcUsdRate } from "@/lib/btc-price";
 import Amount from "@/components/Amount";
 
-const STATUSES = ["pending_payment", "paid", "verified", "disputed", "refunded", "settled"];
+const STATUSES = ["pending", "completed", "failed", "refunded"];
 
 export default async function AdminTransactionsPage({
   searchParams,
@@ -12,7 +13,7 @@ export default async function AdminTransactionsPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const { status } = await searchParams;
-  const where: Prisma.OrderWhereInput = status ? { status } : {};
+  const where: Prisma.OrderWhereInput = status ? { status: { in: valuesFor(status) } } : {};
 
   const [orders, usdPerBtc] = await Promise.all([
     db.order.findMany({

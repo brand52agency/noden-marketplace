@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { priceCreditsLite } from "@/lib/credits";
+import { COMPLETED_VALUES } from "@/lib/order-status";
 import { REAL_COMPLETED_WHERE, REAL_ORDER_WHERE } from "@/lib/reputation";
 
 export type PulseStats = {
@@ -34,7 +35,7 @@ export async function getPulseStats(): Promise<PulseStats> {
     }),
     db.listing.findMany({ where: { active: true }, select: { category: true }, distinct: ["category"] }),
     db.order.count({ where: REAL_COMPLETED_WHERE }),
-    db.order.aggregate({ _sum: { amountSats: true }, where: { status: "settled", ...REAL_ORDER_WHERE } }),
+    db.order.aggregate({ _sum: { amountSats: true }, where: { status: { in: [...COMPLETED_VALUES] }, ...REAL_ORDER_WHERE } }),
     db.order.count({ where: { createdAt: { gte: sevenDaysAgo }, ...REAL_ORDER_WHERE } }),
     db.listing.findMany({ where: { active: true }, select: { id: true, priceSats: true } }),
   ]);

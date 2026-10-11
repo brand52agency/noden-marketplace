@@ -31,12 +31,12 @@ async function main() {
     if (view.listing) assert.deepEqual(Object.keys(view.listing).sort(), ["category", "id", "name"]);
   }
   console.log(`PASS ${orders.length} real orders: response is a whitelist (no seller, keys, hashes, prompt or schemas)`);
-  const sample = presentOrder(orders[0]);
-  assert.deepEqual(
-    Object.keys(sample).filter((k) => (sample as Record<string, unknown>)[k] !== undefined).sort(),
-    ["amountSats", "createdAt", "failureNote", "id", "input", "listing", "listingId", "output", "paidAt", "settledAt", "status", "verificationResult"].sort()
-  );
-  console.log("PASS exact set of exposed fields");
+  const ALLOWED = new Set(["amountSats", "createdAt", "failureNote", "id", "input", "invoice", "listing", "listingId", "message", "output", "paidAt", "retryToken", "retryTokenExpiresAt", "settledAt", "status", "verificationResult"]);
+  for (const o of orders) {
+    const defined = Object.entries(presentOrder(o)).filter(([, v]) => v !== undefined).map(([k]) => k);
+    for (const k of defined) assert.ok(ALLOWED.has(k), `unexpected field "${k}" in the order response`);
+  }
+  console.log("PASS only whitelisted fields are ever present");
   await db.$disconnect();
 }
 

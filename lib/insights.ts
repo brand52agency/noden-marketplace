@@ -1,3 +1,4 @@
+import { isCompleted, isFailed } from "@/lib/order-status";
 import Anthropic from "@anthropic-ai/sdk";
 import { db } from "@/lib/db";
 
@@ -20,11 +21,11 @@ async function buildDataSummary() {
     const sel = (bySeller[o.sellerId] ??= { count: 0, revenue: 0, disputes: 0 });
     cat.count += 1;
     sel.count += 1;
-    if (o.status === "settled") {
+    if (isCompleted(o.status)) {
       cat.revenue += o.amountSats;
       sel.revenue += o.amountSats;
     }
-    if (o.status === "disputed" || o.status === "refunded") {
+    if (isFailed(o.status) || o.status === "refunded") {
       cat.disputes += 1;
       sel.disputes += 1;
     }
@@ -33,8 +34,8 @@ async function buildDataSummary() {
   return {
     windowDays: 30,
     totalOrders: orders.length,
-    settled: orders.filter((o) => o.status === "settled").length,
-    disputed: orders.filter((o) => o.status === "disputed" || o.status === "refunded").length,
+    settled: orders.filter((o) => isCompleted(o.status)).length,
+    disputed: orders.filter((o) => isFailed(o.status) || o.status === "refunded").length,
     byCategory,
     bySeller,
   };

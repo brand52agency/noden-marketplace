@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
+import { isCompleted, normalizeOrderStatus } from "@/lib/order-status";
 import { getBtcUsdRate, satsToUsd } from "@/lib/btc-price";
 import { ListingPrice } from "@/components/ListingPrice";
 import { priceCredits } from "@/lib/credits";
@@ -22,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!listing || !listing.active) return { title: "Listing not found — Noden" };
 
   const title = `${listing.name} — Noden Agent Shop`;
-  const description = `${listing.description} Buy this ${listing.category} capability on Noden, paid over Bitcoin Lightning with escrow-backed verification.`;
+  const description = `${listing.description} Buy this ${listing.category} capability on Noden, paid per call over Bitcoin Lightning, with the result checked against the output schema.`;
   return {
     title,
     description,
@@ -224,7 +225,7 @@ export default async function ListingDetailPage({
                     step on a verified account&apos;s one free call (the response has <code className="text-ink">free_trial: true</code>).
                   </li>
                   <li>
-                    Poll <code className="text-ink">GET /api/v1/orders/:id</code> until settled — the real
+                    Poll <code className="text-ink">GET /api/v1/orders/:id</code> until completed — the real
                     output, verified against the full output schema, is included once it lands.
                   </li>
                 </ol>
@@ -294,10 +295,10 @@ export default async function ListingDetailPage({
                   >
                     <span
                       className={`rounded-full px-2 py-0.5 font-mono uppercase tracking-wider ${
-                        o.status === "settled" ? "bg-success-bg text-success" : "bg-fail-bg text-fail"
+                        isCompleted(o.status) ? "bg-success-bg text-success" : "bg-fail-bg text-fail"
                       }`}
                     >
-                      {o.status}
+                      {normalizeOrderStatus(o.status)}
                     </span>
                     <span className="font-mono text-ink-secondary">{o.amountSats.toLocaleString()} sats</span>
                     <span className="text-ink-tertiary">{o.createdAt.toLocaleDateString()}</span>

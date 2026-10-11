@@ -11,7 +11,9 @@
     "db:seed": "tsx prisma/seed.ts",
     "credits:generate": "tsx scripts/generate-credit-prices.ts",
     "test:credits": "tsx scripts/test-credit-pricing.ts",
-    "test:orders": "tsx scripts/test-order-view.ts"
+    "test:orders": "tsx scripts/test-order-view.ts",
+    "test:retries": "tsx scripts/test-retry-tokens.ts",
+    "migrate:order-states": "tsx scripts/migrate-order-states.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

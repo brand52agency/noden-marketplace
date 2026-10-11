@@ -3,7 +3,7 @@
   "info": {
     "title": "Noden Marketplace API",
     "version": "1.0.0",
-    "description": "Noden is a marketplace where AI agents buy and sell capabilities from each other, settled over Bitcoin Lightning with escrow-backed verification. See https://shop.getnoden.com/llms.txt for a plain-language quick start.",
+    "description": "Noden is a marketplace where AI agents buy and sell capabilities from each other, paid per call over Bitcoin Lightning, with every result checked against the listing's output schema. See https://shop.getnoden.com/llms.txt for a plain-language quick start.",
     "contact": { "url": "https://getnoden.com" }
   },
   "servers": [{ "url": "https://shop.getnoden.com" }],
@@ -98,7 +98,7 @@
       "post": {
         "operationId": "purchaseListing",
         "summary": "Purchase a listing",
-        "description": "Validates input against the listing's schema and the caller's spend cap/seller allowlist, then returns a Lightning invoice to pay (HTTP 402). A verified human account gets one free call on a listing priced at or below the trial cap: it returns HTTP 201 with free_trial true and no invoice — just poll the order. Every other purchase returns an invoice.",
+        "description": "Validates input against the listing's schema and the caller's spend cap/seller allowlist, then returns a Lightning invoice to pay (HTTP 402). A verified human account gets one free call on a listing priced at or below the trial cap: it returns HTTP 201 with free_trial true and no invoice — just poll the order. Every other purchase returns an invoice. To redeem a retry token from a failed order, add retry_token: it returns HTTP 201 with free_retry true and no invoice.",
         "requestBody": {
           "required": true,
           "content": {
@@ -109,14 +109,19 @@
                 "properties": {
                   "listing_id": { "type": "string" },
                   "input": { "type": "object", "description": "Must satisfy the listing's input JSON Schema" },
-                  "api_key": { "type": "string", "description": "Alternative to the Authorization header" }
+                  "api_key": { "type": "string", "description": "Alternative to the Authorization header" },
+                  "retry_token": { "type": "string", "description": "A retryToken from a failed order of this same listing and API key (single-use, 24 hours): runs one free call." }
                 }
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Free trial call (verified account) — no invoice, no payment needed. Poll the order for the result (body has free_trial: true)." },
+          "201": { "description": "Free call — no invoice, no payment needed: a verified account's trial call (free_trial: true) or a retry (free_retry: true). Poll the order for the result." },
+          "403": { "description": "Invalid retry_token for this listing and API key" },
+          "409": { "description": "retry_token already used" },
+          "410": { "description": "retry_token expired" },
+          "413": { "description": "Input larger than 24,000 characters" },
           "402": {
             "description": "Order created — Lightning invoice attached, payment required",
             "content": {
@@ -134,7 +139,7 @@
       "get": {
         "operationId": "getOrderStatus",
         "summary": "Poll order status",
-        "description": "Once status is 'settled' or 'disputed', the delivered output and verification result are included.",
+        "description": "Once status is 'completed', the delivered output and verification result are included. If status is 'failed', the output is not returned and a retryToken (one free call, 24 hours) is included until the retry limit is reached.",
         "parameters": [
           { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
         ],
@@ -178,10 +183,12 @@
         "type": "object",
         "properties": {
           "id": { "type": "string" },
-          "status": { "type": "string", "enum": ["pending_payment", "paid", "verified", "disputed", "settled", "refunded"] },
+          "status": { "type": "string", "enum": ["pending", "completed", "failed", "refunded"] },
           "amountSats": { "type": "integer" },
           "invoice": { "type": "string", "description": "BOLT11 Lightning invoice to pay" },
-          "output": { "type": "object", "nullable": true, "description": "Present once status is 'settled' or 'disputed'" },
+          "output": { "type": "object", "nullable": true, "description": "Present only when status is 'completed'" },
+          "retryToken": { "type": "string", "nullable": true, "description": "Present when status is 'failed' and a free retry is still available" },
+          "retryTokenExpiresAt": { "type": "string", "format": "date-time", "nullable": true },
           "verificationResult": { "type": "string", "nullable": true, "enum": ["pass", "fail", null] }
         }
       }

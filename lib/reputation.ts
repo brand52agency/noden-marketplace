@@ -1,10 +1,11 @@
+import { COMPLETED_VALUES, FAILED_VALUES, REFUNDED_VALUES } from "@/lib/order-status";
 // Fresh listings start at the Prisma schema defaults (reputation: 5.0,
 // successRate: 1.0) simply because they've never been ordered — not
 // because they've earned a perfect record. Presenting that default as a
 // real score is misleading to any agent or registry deciding who to
 // trust, so anything showing reputation to a caller should route through
 // this instead of reading the raw columns directly.
-export const COMPLETED_ORDER_STATUSES = ["settled", "disputed", "refunded"] as const;
+export const COMPLETED_ORDER_STATUSES = [...COMPLETED_VALUES, ...FAILED_VALUES, ...REFUNDED_VALUES] as const;
 
 // Orders from seeded demo buyers, internal test operators, and the registry
 // protocol-test operator are real rows (admin still sees them) but must never

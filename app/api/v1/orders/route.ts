@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   if (raw.length > MAX_REQUEST_BODY_BYTES) {
     return NextResponse.json({ error: `request body too large (max ${MAX_REQUEST_BODY_BYTES} bytes)` }, { status: 413 });
   }
-  let body: { api_key?: string; listing_id?: string; input?: Record<string, unknown> } | null = null;
+  let body: { api_key?: string; listing_id?: string; input?: Record<string, unknown>; retry_token?: string } | null = null;
   try {
     body = raw ? JSON.parse(raw) : null;
   } catch {
@@ -37,8 +37,9 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await createOrder(apiKey, listingId, input);
-    return NextResponse.json(result, { status: "free_trial" in result ? 201 : 402 });
+    const retryToken = typeof body?.retry_token === "string" ? body.retry_token : undefined;
+    const result = await createOrder(apiKey, listingId, input, undefined, retryToken);
+    return NextResponse.json(result, { status: "free_trial" in result || "free_retry" in result ? 201 : 402 });
   } catch (err) {
     if (err instanceof MarketplaceError) {
       return NextResponse.json({ error: err.message }, { status: err.status });

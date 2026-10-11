@@ -4,6 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { db } from "../lib/db";
+import { MAX_RETRIES_PER_PAYMENT } from "../lib/marketplace";
 import {
   MAX_INPUT_CHARS,
   MIN_TYPICAL_MARGIN,
@@ -47,6 +48,13 @@ async function main() {
   const typMargin = Math.min(...rows.map((r) => r.b.typicalMargin));
   const maxWorst = Math.max(...rows.map((r) => r.b.worstCaseCostUsd));
   const maxTypical = Math.max(...rows.map((r) => r.b.typicalCostUsd));
+  // Failed checks cost Noden compute but earn the buyer a free retry (up to MAX_RETRIES_PER_PAYMENT).
+  // Worst abuse: an input crafted to fail every time, at max input and max output.
+  const attempts = 1 + MAX_RETRIES_PER_PAYMENT;
+  const lightningRevenue = (sats: number) => (sats / 100_000_000) * REFERENCE_USD_PER_BTC; // gross, no card fees
+  const retryLoss = rows.map(({ l, b }) => ({ name: l.name, loss: attempts * b.worstCaseCostUsd - lightningRevenue(l.priceSats) }));
+  const worstRetryLoss = Math.max(...retryLoss.map((r) => r.loss));
+  const retryLossers = retryLoss.filter((r) => r.loss > 0).length;
   const costDriven = rows.filter((r) => r.b.fromWorstCase > Math.max(r.b.fromSats, MIN_CREDITS_PER_CALL));
 
   console.log(`${listings.length} listings | credit prices ${Math.min(...rows.map((r) => r.b.credits))}–${Math.max(...rows.map((r) => r.b.credits))}`);
@@ -108,6 +116,14 @@ async function main() {
     `- Credit prices range ${Math.min(...rows.map((r) => r.b.credits))}–${Math.max(...rows.map((r) => r.b.credits))} credits. Distribution: ${[...dist.entries()].sort((a, b) => a[0] - b[0]).map(([c, n]) => `${c} credits × ${n}`).join(", ")}.`,
     `- Lowest margin at the floor: **${pct(worstMargin)}** on the worst possible call, **${pct(typMargin)}** on a typical call.`,
     `- ${costDriven.length} listings are priced above their sats-derived price because of cost.`,
+    "",
+    "## Failed checks and free retries",
+    "",
+    `A failed check returns no output and no sats; the buyer gets a retry token for one free call (up to ${MAX_RETRIES_PER_PAYMENT} per payment, 24 hours). That cap makes the exposure finite: one payment can trigger at most ${attempts} model calls.`,
+    "",
+    `- **Realistic:** if 10% of calls fail, expected cost per paid call rises about 11%. Typical margins (at least ${pct(typMargin)}) absorb that easily.`,
+    `- **Deliberate abuse** (input crafted to fail every attempt, maximum size and output): up to ${attempts} × ${cents(maxWorst)} = ${cents(attempts * maxWorst)} of compute against one payment. Against the sats price that is a loss on ${retryLossers} of ${rows.length} listings, at most ${cents(Math.max(0, worstRetryLoss))} per abusive payment, and each abusive payment still costs the attacker the full price. Failed-call rate limits per key (NODEN_PRICING_TASKS.md F4) are still needed to cap this per hour.`,
+    "- Free-trial calls are bounded the same way: one trial plus at most two free retries (3 calls) per verified email.",
     "",
     "## Per listing",
     "",
