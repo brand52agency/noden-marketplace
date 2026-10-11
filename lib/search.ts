@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { priceCredits } from "@/lib/credits";
 import { Prisma } from "@prisma/client";
 import { outputFieldNames } from "@/lib/schema-preview";
 import { describeReputation, REAL_COMPLETED_WHERE } from "@/lib/reputation";
@@ -67,6 +68,8 @@ export async function searchListings({ query, category, maxPriceSats, sort }: Li
   // lib/schema-preview.ts.
   const mapped = listings.map(({ outputSchema, successRate, reputation, _count, ...listing }) => ({
     ...listing,
+    priceCredits: priceCredits({ ...listing, outputSchema }),
+    price_credits: priceCredits({ ...listing, outputSchema }),
     ...describeReputation({ successRate, reputation }, _count.orders),
     output_fields: outputFieldNames(outputSchema),
   }));

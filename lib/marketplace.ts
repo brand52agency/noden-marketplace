@@ -5,11 +5,12 @@ import { Prisma } from "@prisma/client";
 import { paymentRail } from "@/lib/payments";
 import { requestWalletPayment } from "@/lib/payments/nwc";
 import { verifyAgainstSchema } from "@/lib/verify";
-import { fulfill } from "@/lib/fulfillment";
+import { fulfillWithUsage, type FulfillmentUsage } from "@/lib/fulfillment";
 import { logAction } from "@/lib/audit";
 import { splitPayout } from "@/lib/fees";
 import { generateApiKey } from "@/lib/api-key";
 import { REAL_COMPLETED_WHERE } from "@/lib/reputation";
+import { inputTooLarge } from "@/lib/credits";
 
 export class MarketplaceError extends Error {
   constructor(
@@ -109,6 +110,11 @@ export async function createOrder(
   if (!inputCheck.valid) {
     throw new MarketplaceError(`input does not match listing schema: ${inputCheck.errors}`, 422);
   }
+
+  // Bounds what one call can cost Noden (see lib/credits.ts): many listings accept unbounded
+  // arrays, so without this a single order could send ~200K tokens to the model.
+  const tooLarge = inputTooLarge(input);
+  if (tooLarge) throw new MarketplaceError(tooLarge, 413);
 
   if (await claimFreeTrial(operator, listing)) {
     let trialOrder;
@@ -227,12 +233,29 @@ export async function getOrderStatus(orderId: string) {
   // no separate agent call needed (build spec §5).
   let output: Record<string, unknown>;
   let verification: ReturnType<typeof verifyAgainstSchema>;
+  let usage: FulfillmentUsage | null = null;
   try {
-    output = await fulfill(order.listing, order.input as Record<string, unknown>);
+    const fulfilled = await fulfillWithUsage(order.listing, order.input as Record<string, unknown>);
+    output = fulfilled.output;
+    usage = fulfilled.usage;
     verification = verifyAgainstSchema(output, order.listing.outputSchema as object);
   } catch (err) {
     output = { error: err instanceof Error ? err.message : "fulfillment failed" };
     verification = { valid: false, errors: output.error as string };
+  }
+
+  // What this call actually cost Noden, next to what the buyer paid. Compare with the estimate in
+  // docs/credit-pricing.md (query these entries to audit margins). A logging failure never affects the order.
+  if (usage) {
+    await logAction(order.buyerId, "fulfillment_cost", {
+      orderId: order.id,
+      listingId: order.listingId,
+      inputTokens: usage.inputTokens,
+      outputTokens: usage.outputTokens,
+      costUsd: Number(usage.costUsd.toFixed(6)),
+      priceSats: order.amountSats,
+      freeTrial: isTrial,
+    }).catch((err) => console.error("fulfillment_cost log failed:", err));
   }
 
   await logAction(order.buyerId, "verification", { orderId: order.id, pass: verification.valid });

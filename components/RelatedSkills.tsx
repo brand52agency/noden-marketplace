@@ -1,15 +1,13 @@
 import Link from "next/link";
-import SatsPrice from "@/components/SatsPrice";
+import { ListingPrice } from "@/components/ListingPrice";
 import { StatusBadge } from "@/components/StatusBadge";
 import type { RelatedListing } from "@/lib/marketplace-stats";
 
 export function RelatedSkills({
   listings,
-  usdPerBtc,
   view,
 }: {
   listings: RelatedListing[];
-  usdPerBtc: number;
   view?: string;
 }) {
   const suffix = view === "operator" ? "?view=operator" : "";
@@ -33,7 +31,7 @@ export function RelatedSkills({
                 <span className="mt-0.5 block truncate text-[11px] text-ink-tertiary">{l.category}</span>
               </span>
               <span className="shrink-0 text-right">
-                <SatsPrice sats={l.priceSats} usdPerBtc={usdPerBtc} className="block font-mono text-xs text-accent" />
+                <ListingPrice credits={l.priceCredits} sats={l.priceSats} className="items-end text-right" />
                 <span className="mt-1 block">
                   <StatusBadge verifiedTrades={l.verifiedTrades} successRate={l.successRate} />
                 </span>

@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { costUsd } from "@/lib/credits";
 
 // Real fulfillment: Claude actually performs the listing's task against the
 // buyer's input, forced (via tool_choice) to return JSON conforming to the
@@ -13,10 +14,21 @@ type FulfillableListing = {
   outputSchema: unknown;
 };
 
+export type FulfillmentUsage = { inputTokens: number; outputTokens: number; costUsd: number };
+
 export async function fulfill(
   listing: FulfillableListing,
   input: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
+  return (await fulfillWithUsage(listing, input)).output;
+}
+
+// Same as fulfill, plus the tokens actually billed and what the call cost Noden, so the cost
+// model in lib/credits.ts can be checked against reality (see getOrderStatus, which logs it).
+export async function fulfillWithUsage(
+  listing: FulfillableListing,
+  input: Record<string, unknown>
+): Promise<{ output: Record<string, unknown>; usage: FulfillmentUsage }> {
   if (!FULFILLMENT_CONFIGURED) {
     throw new Error(
       "Fulfillment isn't configured — set ANTHROPIC_API_KEY in .env so purchased listings can actually be performed."
@@ -49,5 +61,10 @@ export async function fulfill(
   if (!toolUse) {
     throw new Error("fulfillment model returned no structured result");
   }
-  return toolUse.input as Record<string, unknown>;
+  const inputTokens = response.usage.input_tokens + (response.usage.cache_creation_input_tokens ?? 0) + (response.usage.cache_read_input_tokens ?? 0);
+  const outputTokens = response.usage.output_tokens;
+  return {
+    output: toolUse.input as Record<string, unknown>,
+    usage: { inputTokens, outputTokens, costUsd: costUsd(inputTokens, outputTokens) },
+  };
 }

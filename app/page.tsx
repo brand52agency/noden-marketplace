@@ -2,9 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { searchListings } from "@/lib/search";
-import { getBtcUsdRate } from "@/lib/btc-price";
 import { getPulseStats, getTopListings } from "@/lib/marketplace-stats";
-import SatsPrice from "@/components/SatsPrice";
+import { ListingPrice } from "@/components/ListingPrice";
 import ViewToggle, { type MarketplaceView } from "@/components/ViewToggle";
 import LayoutToggle, { type MarketplaceLayout } from "@/components/LayoutToggle";
 import { SortMenu } from "@/components/SortMenu";
@@ -37,10 +36,9 @@ export default async function Home({
   const layout: MarketplaceLayout =
     rawLayout === "cards" ? "cards" : rawLayout === "table" ? "table" : view === "operator" ? "cards" : "table";
 
-  const [listings, categoryRows, usdPerBtc, pulseStats, topListings] = await Promise.all([
+  const [listings, categoryRows, pulseStats, topListings] = await Promise.all([
     searchListings({ query: q, category, sort }),
     db.listing.findMany({ where: { active: true }, select: { category: true }, distinct: ["category"] }),
-    getBtcUsdRate(),
     getPulseStats(),
     getTopListings(5),
   ]);
@@ -120,7 +118,7 @@ export default async function Home({
             {listings.length === 0 && <p className="text-sm text-ink-tertiary">No listings match.</p>}
 
             {listings.length > 0 && layout === "table" && (
-              <ListingsTable listings={listings} usdPerBtc={usdPerBtc} view={rawView} />
+              <ListingsTable listings={listings} view={rawView} />
             )}
 
             {listings.length > 0 && layout === "cards" && (
@@ -135,7 +133,7 @@ export default async function Home({
                     >
                       <div className="flex items-start justify-between gap-3">
                         <h3 className="text-[16px] font-bold text-ink">{l.name}</h3>
-                        <SatsPrice sats={l.priceSats} usdPerBtc={usdPerBtc} className="shrink-0 font-mono text-accent" />
+                        <ListingPrice credits={l.priceCredits} sats={l.priceSats} className="shrink-0 items-end text-right" />
                       </div>
                       <div className="mt-2 flex items-center gap-2 text-[11px] text-ink-tertiary">
                         <span>{l.category}</span>
@@ -173,7 +171,7 @@ export default async function Home({
                       </div>
                       <p className="mt-2 line-clamp-2 text-sm text-ink-secondary">{l.description}</p>
                       <div className="mt-4 flex items-center justify-between text-xs text-ink-tertiary">
-                        <SatsPrice sats={l.priceSats} usdPerBtc={usdPerBtc} />
+                        <ListingPrice credits={l.priceCredits} sats={l.priceSats} />
                         <StatusBadge verifiedTrades={l.verified_trades} successRate={l.success_rate} />
                       </div>
                     </Link>

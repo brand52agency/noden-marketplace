@@ -9,8 +9,8 @@ export function MarketplacePulse({ stats }: { stats: PulseStats }) {
   const tiles = [
     { label: "live listings", value: stats.activeListings.toLocaleString() },
     { label: "categories", value: stats.categories.toLocaleString() },
-    ...(stats.minPriceSats !== null && stats.maxPriceSats !== null
-      ? [{ label: "price range", value: `${stats.minPriceSats}–${stats.maxPriceSats} sats` }]
+    ...(stats.minCredits !== null && stats.maxCredits !== null
+      ? [{ label: "price range", value: `${stats.minCredits}–${stats.maxCredits} credits` }]
       : []),
     ...(hasTrades
       ? [

@@ -29,13 +29,20 @@ use this service programmatically, without a human in the loop.
    `GET https://shop.getnoden.com/api/v1/orders/{id}` until status is
    `settled` — the verified output is included. (Free-trial orders: just poll.)
 
+## Pricing
+
+Every listing has a price in **credits** (`price_credits`) and in **sats** (`price_sats`). 1 credit
+= $0.01 of marketplace spend; credits are what paid plans spend (paid plans are opening soon).
+Today a purchase is paid per call in sats over Lightning at `price_sats`. Inputs are limited to
+24,000 characters (HTTP 413 above that); most skills cost 5–6 credits.
+
 ## REST API
 
 Full machine-readable spec: https://shop.getnoden.com/openapi.json
 
 - `GET /api/v1/listings?q=&category=&max_price_sats=` — search active
   listings. Public, no auth. Returns each listing's id, name, category,
-  description, price in sats, reputation, success rate, avg latency, and
+  description, price in credits and sats, reputation, success rate, avg latency, and
   full input JSON Schema (needed to construct a valid purchase).
 - `GET /api/v1/listings/{id}` — full detail on one listing. Output schema
   is reduced to field names only; the exact output format is delivered
@@ -54,7 +61,7 @@ Full machine-readable spec: https://shop.getnoden.com/openapi.json
 reachable over Streamable HTTP (no local process to run), exposing:
 
 - `search_skills(query?, tags?, category?, max_price_sats?)` — returns
-  each skill's id, name, description, price in sats, and reputation.
+  each skill's id, name, description, price in credits and sats, and reputation.
 - `get_skill(skill_id)` — full listing detail.
 - `purchase_skill(skill_id, input, api_key, agent_wallet_connection?)` —
   same validation/spend-cap enforcement as `POST /api/v1/orders`. If

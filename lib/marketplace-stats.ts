@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { priceCreditsLite } from "@/lib/credits";
 import { REAL_COMPLETED_WHERE, REAL_ORDER_WHERE } from "@/lib/reputation";
 
 export type PulseStats = {
@@ -10,6 +11,8 @@ export type PulseStats = {
   ordersLast7d: number;
   minPriceSats: number | null;
   maxPriceSats: number | null;
+  minCredits: number | null;
+  maxCredits: number | null;
 };
 
 // All real aggregates off Listing/Order — no placeholder numbers. See
@@ -17,7 +20,7 @@ export type PulseStats = {
 export async function getPulseStats(): Promise<PulseStats> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-  const [activeListings, tradedListings, categoryRows, verifiedTrades, volume, ordersLast7d, priceRange] = await Promise.all([
+  const [activeListings, tradedListings, categoryRows, verifiedTrades, volume, ordersLast7d, priceRows] = await Promise.all([
     db.listing.count({ where: { active: true } }),
     // Reputation defaults to 5.0 for a listing that's never traded — that's
     // not an earned score, so averaging it in would be fabricating quality
@@ -33,8 +36,9 @@ export async function getPulseStats(): Promise<PulseStats> {
     db.order.count({ where: REAL_COMPLETED_WHERE }),
     db.order.aggregate({ _sum: { amountSats: true }, where: { status: "settled", ...REAL_ORDER_WHERE } }),
     db.order.count({ where: { createdAt: { gte: sevenDaysAgo }, ...REAL_ORDER_WHERE } }),
-    db.listing.aggregate({ where: { active: true }, _min: { priceSats: true }, _max: { priceSats: true } }),
+    db.listing.findMany({ where: { active: true }, select: { id: true, priceSats: true } }),
   ]);
+  const credits = priceRows.map((l) => priceCreditsLite(l.id, l.priceSats));
 
   const traded = tradedListings.filter((l) => l._count.orders > 0);
   const avgQualityScore = traded.length
@@ -48,8 +52,10 @@ export async function getPulseStats(): Promise<PulseStats> {
     verifiedTrades,
     volumeSettledSats: volume._sum.amountSats ?? 0,
     ordersLast7d,
-    minPriceSats: priceRange._min.priceSats,
-    maxPriceSats: priceRange._max.priceSats,
+    minPriceSats: priceRows.length ? Math.min(...priceRows.map((l) => l.priceSats)) : null,
+    maxPriceSats: priceRows.length ? Math.max(...priceRows.map((l) => l.priceSats)) : null,
+    minCredits: credits.length ? Math.min(...credits) : null,
+    maxCredits: credits.length ? Math.max(...credits) : null,
   };
 }
 
@@ -96,6 +102,7 @@ export type RelatedListing = {
   name: string;
   category: string;
   priceSats: number;
+  priceCredits: number;
   reputation: number;
   successRate: number;
   verifiedTrades: number;
@@ -124,6 +131,7 @@ export async function getRelatedListings(category: string, excludeId: string, li
     name: l.name,
     category: l.category,
     priceSats: l.priceSats,
+    priceCredits: priceCreditsLite(l.id, l.priceSats),
     reputation: l.reputation,
     successRate: l.successRate,
     verifiedTrades: l._count.orders,

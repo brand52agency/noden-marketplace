@@ -1,5 +1,6 @@
 import { outputFieldNames } from "@/lib/schema-preview";
 import { describeReputation } from "@/lib/reputation";
+import { priceCreditsLite } from "@/lib/credits";
 
 const SITE = "https://shop.getnoden.com";
 
@@ -29,7 +30,7 @@ export function renderListingMarkdown(l: MarkdownListing): string {
     l.description,
     "",
     `- **Category:** ${l.category}`,
-    `- **Price:** ${l.priceSats} sats per call (paid over Bitcoin Lightning; a verified account gets one free call)`,
+    `- **Price:** ${priceCreditsLite(l.id, l.priceSats)} credits per call (1 credit = $0.01 of marketplace spend; credits are used on paid plans, which are opening soon). Today: ${l.priceSats} sats per call over Bitcoin Lightning; a verified account gets one free call.`,
     `- **Listing id:** \`${l.id}\``,
     `- **Verified trades:** ${rep.verified_trades}`,
     `- **Success rate:** ${rep.success_rate === null ? "n/a (no completed trades yet)" : `${(rep.success_rate * 100).toFixed(0)}%`}`,
@@ -69,10 +70,11 @@ export function renderCatalogMarkdown(listings: CatalogEntry[]): string {
   const byCategory = new Map<string, CatalogEntry[]>();
   for (const l of listings) byCategory.set(l.category, [...(byCategory.get(l.category) ?? []), l]);
   const prices = listings.map((l) => l.priceSats);
+  const credits = listings.map((l) => priceCreditsLite(l.id, l.priceSats));
   const lines = [
     "# Noden skill catalog",
     "",
-    `${listings.length} skills across ${byCategory.size} categories, ${Math.min(...prices)}–${Math.max(...prices)} sats per call. Each entry links to a markdown page with its input schema and purchase steps.`,
+    `${listings.length} skills across ${byCategory.size} categories, ${Math.min(...credits)}–${Math.max(...credits)} credits (${Math.min(...prices)}–${Math.max(...prices)} sats) per call. Each entry links to a markdown page with its input schema and purchase steps.`,
     "",
     `Search the live catalog: \`GET ${SITE}/api/v1/listings?q=\` · MCP: ${SITE}/mcp · OpenAPI: ${SITE}/openapi.json`,
     "",
@@ -80,7 +82,7 @@ export function renderCatalogMarkdown(listings: CatalogEntry[]): string {
   for (const category of [...byCategory.keys()].sort()) {
     lines.push(`## ${category}`, "");
     for (const l of byCategory.get(category)!) {
-      lines.push(`- [${l.name}](${SITE}/marketplace/${l.id}.md) — ${l.priceSats} sats. ${l.description}`);
+      lines.push(`- [${l.name}](${SITE}/marketplace/${l.id}.md) — ${priceCreditsLite(l.id, l.priceSats)} credits (${l.priceSats} sats). ${l.description}`);
     }
     lines.push("");
   }

@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
 import { getBtcUsdRate, satsToUsd } from "@/lib/btc-price";
-import SatsPrice from "@/components/SatsPrice";
+import { ListingPrice } from "@/components/ListingPrice";
+import { priceCredits } from "@/lib/credits";
 import { StatusBadge } from "@/components/StatusBadge";
 import { RelatedSkills } from "@/components/RelatedSkills";
 import { getRelatedListings } from "@/lib/marketplace-stats";
@@ -65,6 +66,7 @@ export default async function ListingDetailPage({
   if (!listing || !listing.active) notFound();
 
   const rep = describeReputation(listing, listing._count.orders);
+  const credits = priceCredits(listing);
   const related = await getRelatedListings(listing.category, listing.id, 5);
 
   const jsonLd = {
@@ -122,12 +124,11 @@ export default async function ListingDetailPage({
           </div>
 
           <div className="shrink-0 rounded-2xl border border-border bg-surface p-5 text-right">
-            <p className="font-mono text-[11px] uppercase tracking-wider text-ink-tertiary">price</p>
-            <SatsPrice
-              sats={listing.priceSats}
-              usdPerBtc={usdPerBtc}
-              className="mt-1 block font-mono text-2xl font-semibold text-accent"
-            />
+            <p className="font-mono text-[11px] uppercase tracking-wider text-ink-tertiary">price per call</p>
+            <ListingPrice credits={credits} sats={listing.priceSats} size="lg" className="mt-1 items-end" />
+            <p className="mt-3 max-w-[220px] text-[11px] leading-snug text-ink-tertiary">
+              Credits are spent on paid plans, which are opening soon. Today you pay per call in sats over Lightning.
+            </p>
           </div>
         </div>
       </div>
@@ -308,7 +309,7 @@ export default async function ListingDetailPage({
         </div>
 
         <aside className="flex flex-col gap-6">
-          <RelatedSkills listings={related} usdPerBtc={usdPerBtc} view={rawView} />
+          <RelatedSkills listings={related} view={rawView} />
         </aside>
       </div>
     </main>

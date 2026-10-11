@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { searchListings } from "@/lib/search";
 import { db } from "@/lib/db";
+import { priceCredits } from "@/lib/credits";
 import { createOrder, getOrderStatus, registerSelfServeOperator, MarketplaceError } from "@/lib/marketplace";
 import { outputFieldNames } from "@/lib/schema-preview";
 import { describeReputation, REAL_COMPLETED_WHERE } from "@/lib/reputation";
@@ -38,6 +39,7 @@ export function createMcpServer() {
           id: l.id,
           name: l.name,
           description: l.description,
+          price_credits: l.priceCredits,
           price_sats: l.priceSats,
           reputation: l.reputation,
           success_rate: l.success_rate,
@@ -65,6 +67,7 @@ export function createMcpServer() {
       return text({
         skill: {
           ...rest,
+          price_credits: priceCredits({ ...listing, outputSchema }),
           ...describeReputation({ successRate, reputation }, _count.orders),
           output_fields: outputFieldNames(outputSchema),
         },
@@ -190,6 +193,7 @@ export function createMcpServer() {
                   id: l.id,
                   name: l.name,
                   description: l.description,
+                  price_credits: l.priceCredits,
                   price_sats: l.priceSats,
                   reputation: l.reputation,
                   success_rate: l.success_rate,

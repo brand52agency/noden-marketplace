@@ -1,5 +1,5 @@
 import Link from "next/link";
-import SatsPrice from "@/components/SatsPrice";
+import { ListingPrice } from "@/components/ListingPrice";
 import { StatusBadge } from "@/components/StatusBadge";
 
 type TableListing = {
@@ -7,17 +7,16 @@ type TableListing = {
   name: string;
   category: string;
   priceSats: number;
+  priceCredits: number;
   verified_trades: number;
   success_rate: number | null;
 };
 
 export function ListingsTable({
   listings,
-  usdPerBtc,
   view,
 }: {
   listings: TableListing[];
-  usdPerBtc: number;
   view?: string;
 }) {
   const suffix = view === "operator" ? "?view=operator" : "";
@@ -41,7 +40,7 @@ export function ListingsTable({
           >
             <span className="col-span-2 truncate text-sm font-medium text-ink sm:col-span-1">{l.name}</span>
             <span className="truncate text-xs text-ink-secondary">{l.category}</span>
-            <SatsPrice sats={l.priceSats} usdPerBtc={usdPerBtc} className="font-mono text-xs text-accent" />
+            <ListingPrice credits={l.priceCredits} sats={l.priceSats} />
             <span className="font-mono text-xs text-ink-tertiary">
               {l.verified_trades > 0 ? `${l.verified_trades}×` : "—"}
             </span>
