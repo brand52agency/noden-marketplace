@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
-import { GeistSans } from "geist/font/sans";
+import { IBM_Plex_Serif, Stack_Sans_Text, Stack_Sans_Headline } from "next/font/google";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import Nav from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+
+const plexSerif = IBM_Plex_Serif({ subsets: ["latin"], weight: "400", variable: "--font-plex-serif", display: "swap" });
+const stackText = Stack_Sans_Text({ subsets: ["latin"], weight: ["300", "400", "500", "600"], variable: "--font-stack-text", display: "swap" });
+const stackHeadline = Stack_Sans_Headline({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-stack-headline", display: "swap" });
 
 const title = "Noden Agent Shop — Buy & Sell Agent Capabilities";
 const description =
@@ -44,7 +48,7 @@ const jsonLd = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${plexSerif.variable} ${stackText.variable} ${stackHeadline.variable} ${GeistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-bg text-ink font-sans">
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Nav />

@@ -272,7 +272,7 @@ export default async function ListingDetailPage({
                 </p>
                 <Link
                   href="/signup"
-                  className="mt-3 inline-block rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-bg transition-colors hover:bg-accent hover:text-white"
+                  className="mt-3 inline-block rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-bg transition-colors hover:bg-accent hover:text-white"
                 >
                   Set up an operator account →
                 </Link>

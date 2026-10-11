@@ -7,14 +7,16 @@
      reference the marketing site was restyled to match). */
   /* Light, warm theme shared with getnoden.com. Text/background pairs meet
      WCAG AA (4.5:1). */
-  --color-bg: #fbf8f4;
+  /* Same palette as getnoden.com: warm off-white canvas, near-black ink, white cards.
+     Text/background pairs meet WCAG AA (4.5:1). */
+  --color-bg: #f9f8f7;
   --color-surface: #ffffff;
-  --color-surface-raised: #f3eee8;
-  --color-border: #e6dfd6;
+  --color-surface-raised: #f2efed;
+  --color-border: #e9e5e1;
 
-  --color-ink: #1b1b1f;
-  --color-ink-secondary: #5b5764;
-  --color-ink-tertiary: #6e6a75;
+  --color-ink: #231f23;
+  --color-ink-secondary: #5f5a5f;
+  --color-ink-tertiary: #6f6a6f;
 
   --color-accent: #c9441a;
   --color-accent-ink: #ffffff;
@@ -26,15 +28,15 @@
   --color-fail-bg: rgba(201, 58, 58, 0.12);
 
   /* Base UI/body face. */
-  --font-sans: var(--font-geist-sans), ui-sans-serif, sans-serif;
+  --font-sans: var(--font-stack-text), ui-sans-serif, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
   /* Heading face — same as body now; kept as a distinct token since
      h1/h2/h3 below reference --font-serif directly. */
-  --font-serif: var(--font-geist-sans), ui-sans-serif, sans-serif;
+  --font-serif: var(--font-plex-serif), Georgia, serif;
 
   /* Marketing site's --noden-radius-card is 16px — redefining Tailwind's
      built-in rounded-lg so every existing card/input using it matches. */
-  --radius-lg: 16px;
+  --radius-lg: 12px;
 }
 
 body {
@@ -43,48 +45,32 @@ body {
 
 /* Matches the marketing site's hero dot-grid treatment. */
 .dot-grid {
-  background-image: radial-gradient(rgba(27, 27, 31, 0.16) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(35, 31, 35, 0.14) 1px, transparent 1px);
   background-size: 26px 26px;
   -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 40%, transparent 85%);
   mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 40%, transparent 85%);
 }
 
-/* Same eyebrow-badge pattern as getnoden.com — small pill, dot +
-   uppercase monospace label, used above section headlines. */
+/* Eyebrow: small bordered label with an orange slash (same as getnoden.com). */
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  border-radius: 9999px;
+  gap: 0.35rem;
+  border-radius: 8px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
-  padding: 0.3rem 0.75rem;
-  font-family: var(--font-mono), monospace;
+  padding: 0.25rem 0.6rem;
+  font-family: var(--font-stack-text), sans-serif;
   font-size: 0.6875rem;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--color-ink-secondary);
+  color: var(--color-ink);
 }
+.eyebrow-dot { width: auto; height: auto; background: none; flex-shrink: 0; }
+.eyebrow-dot::before { content: "/"; color: #e8532b; font-weight: 700; }
 
-.eyebrow-dot {
-  height: 0.375rem;
-  width: 0.375rem;
-  border-radius: 9999px;
-  background: var(--color-accent);
-  flex-shrink: 0;
-}
-
-/* Colored sections: each re-scopes the color tokens, so cards and text inside
-   recolor themselves. Same palette as getnoden.com. */
-.band-white { background: #ffffff; }
-.band-peach { background: #fdeadb; --color-border: #f1d5bf; --color-surface-raised: #fadfca; }
-.band-sky   { background: #e4edfb; --color-border: #cddcf3; --color-surface-raised: #d6e3f7; }
-.band-mint  { background: #def4ec; --color-border: #bfe5d8; --color-surface-raised: #cdeee3; }
-.hero-glow {
-  background:
-    radial-gradient(ellipse 70% 90% at 50% 0%, rgba(245, 165, 36, 0.2), transparent 75%),
-    linear-gradient(180deg, rgba(201, 68, 26, 0.05), transparent 100%);
-}
+.panel { border-radius: 20px; overflow: hidden; }
 
 .text-balance {
   text-wrap: balance;
@@ -119,13 +105,17 @@ body {
   animation: pulse-dot 2s ease-in-out infinite;
 }
 
+/* Display headings: IBM Plex Serif, regular weight, tightly tracked (matches getnoden.com). */
+h1, h2 {
+  font-family: var(--font-plex-serif), Georgia, serif;
+  font-weight: 400 !important;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+}
+h1 { letter-spacing: -0.05em; }
+h3 { font-family: var(--font-stack-headline), ui-sans-serif, sans-serif; font-weight: 500; }
+
 @layer base {
-  h1,
-  h2,
-  h3 {
-    font-family: var(--font-serif);
-    letter-spacing: -0.02em;
-  }
 
   h2 {
     font-size: clamp(24px, 3vw, 32px);

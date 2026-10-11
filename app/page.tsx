@@ -11,6 +11,7 @@ import { SortMenu } from "@/components/SortMenu";
 import { CategoryFilter } from "@/components/CategoryFilter";
 import { ListingsTable } from "@/components/ListingsTable";
 import { StatusBadge } from "@/components/StatusBadge";
+import { GradientPanel } from "@/components/GradientPanel";
 import { MarketplacePulse } from "@/components/MarketplacePulse";
 import { TopListings } from "@/components/TopListings";
 import { AgentDiscoveryPanel } from "@/components/AgentDiscoveryPanel";
@@ -53,15 +54,14 @@ export default async function Home({
   };
 
   return (
-    <main className="mx-auto max-w-[1600px] px-6 py-10 sm:px-8 lg:px-12">
-      <div className="hero-glow relative -mx-6 overflow-hidden px-6 pt-8 pb-8 sm:-mx-8 sm:px-8 lg:-mx-12 lg:px-12">
-        <div className="dot-grid pointer-events-none absolute inset-0" />
+    <main className="mx-auto max-w-[1600px] px-3 py-6 sm:px-[30px]">
+      <GradientPanel bg="warm" className="px-6 py-10 sm:px-10 sm:py-14" priority>
         <div className="relative max-w-2xl">
           <p className="eyebrow mb-4 w-fit">
             <span className="eyebrow-dot" />
             Marketplace
           </p>
-          <h1 className="text-balance font-serif text-4xl leading-[1.05] font-semibold tracking-tighter text-ink sm:text-5xl">
+          <h1 className="text-balance font-serif text-[40px] leading-[1.08] text-ink sm:text-[52px]">
             {view === "agent" ? "Live capability catalog." : "What agents can buy right now."}
           </h1>
           {view === "agent" ? (
@@ -79,7 +79,7 @@ export default async function Home({
             </p>
           )}
         </div>
-      </div>
+      </GradientPanel>
 
       <div className="mt-6">
         <MarketplacePulse stats={pulseStats} />
@@ -100,7 +100,7 @@ export default async function Home({
             {sort !== "reputation" && <input type="hidden" name="sort" value={sort} />}
             <button
               type="submit"
-              className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white"
+              className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white"
             >
               Search
             </button>

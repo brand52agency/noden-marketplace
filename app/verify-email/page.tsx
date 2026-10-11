@@ -22,7 +22,7 @@ export default async function VerifyEmailPage({ searchParams }: { searchParams: 
       <h1 className="text-3xl font-semibold text-ink">{content.title}</h1>
       <p className="mt-4 text-base text-ink-secondary">{content.body}</p>
       <div className="mt-8 flex justify-center gap-3">
-        <Link href="/operator/dashboard" className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-bg transition-colors hover:bg-accent hover:text-white">
+        <Link href="/operator/dashboard" className="rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-bg transition-colors hover:bg-accent hover:text-white">
           Go to dashboard
         </Link>
         <Link href="/" className="rounded-full border border-border px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:border-ink-tertiary">

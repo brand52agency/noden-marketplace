@@ -55,7 +55,7 @@ export default function SignupPage() {
             <ul className="mt-6 flex flex-col gap-3">
               {perks.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm text-ink">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-xl bg-ink">
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
                       <path d="M5 13l4 4L19 7" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -112,7 +112,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={pending}
-              className="mt-1 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-bg transition-colors hover:bg-accent hover:text-white disabled:opacity-50"
+              className="mt-1 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-bg transition-colors hover:bg-accent hover:text-white disabled:opacity-50"
             >
               {pending ? "Creating account…" : "Create account"}
             </button>

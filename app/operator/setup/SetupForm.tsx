@@ -80,7 +80,7 @@ export default function SetupForm({ operator }: { operator: Operator }) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-full bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white disabled:opacity-50"
+          className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-bg transition-colors hover:bg-accent hover:text-white disabled:opacity-50"
         >
           {pending ? "Saving…" : "Save and go to dashboard"}
         </button>
