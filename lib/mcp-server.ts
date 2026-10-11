@@ -135,7 +135,7 @@ export function createMcpServer(ctx: { headers?: { get(name: string): string | n
     },
     async ({ skill_id, input, api_key, agent_wallet_connection, retry_token }) => {
       try {
-        const result = await createOrder(api_key, skill_id, input, agent_wallet_connection, retry_token);
+        const result = await createOrder(api_key, skill_id, input, agent_wallet_connection, retry_token, { headers: ctx?.headers });
         return text(result);
       } catch (err) {
         if (err instanceof MarketplaceError) return errorText(err.message);

@@ -2,6 +2,7 @@
 // Needs the schema applied (Operator.emailVerifiedAt, TrialClaim, EmailVerificationToken).
 // Stubs the Lightning rail so no real invoices are created, and deletes everything it makes.
 import assert from "node:assert/strict";
+import { sampleInput } from "./_sample-input";
 import { createHash, randomBytes } from "crypto";
 import { db } from "../lib/db";
 import { paymentRail } from "../lib/payments";
@@ -37,13 +38,9 @@ async function verifyNow(operatorId: string) {
 }
 
 async function main() {
-  const cheap = await db.listing.findFirstOrThrow({ where: { active: true, priceSats: { lte: 150 } }, orderBy: { priceSats: "asc" } });
-  const pricey = await db.listing.findFirstOrThrow({ where: { active: true, priceSats: { gt: 150 } } });
-  const input = (l: { inputSchema: unknown }) => {
-    // Minimal valid input: fill required string fields.
-    const schema = l.inputSchema as { required?: string[]; properties?: Record<string, { type?: string }> };
-    return Object.fromEntries((schema.required ?? []).map((k) => [k, schema.properties?.[k]?.type === "number" ? 1 : "https://example.com/x"]));
-  };
+  const cheap = await db.listing.findFirstOrThrow({ where: { active: true, handler: null, priceSats: { lte: 150 } }, orderBy: { priceSats: "asc" } });
+  const pricey = await db.listing.findFirstOrThrow({ where: { active: true, handler: null, priceSats: { gt: 150 } } });
+  const input = (l: { inputSchema: unknown }) => sampleInput(l.inputSchema);
   const ids: string[] = [];
 
   try {

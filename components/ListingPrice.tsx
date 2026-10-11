@@ -12,6 +12,14 @@ export function ListingPrice({
   className?: string;
 }) {
   const big = size === "lg";
+  if (credits === 0 && sats === 0) {
+    return (
+      <span className={`inline-flex flex-col leading-tight ${className}`}>
+        <span className={`font-mono text-accent ${big ? "text-2xl font-semibold" : "text-xs font-medium"}`}>Free</span>
+        <span className={`font-mono text-ink-tertiary ${big ? "mt-1 text-xs" : "text-[10px]"}`}>no payment needed</span>
+      </span>
+    );
+  }
   return (
     <span className={`inline-flex flex-col leading-tight ${className}`}>
       <span className={`font-mono text-accent ${big ? "text-2xl font-semibold" : "text-xs font-medium"}`}>

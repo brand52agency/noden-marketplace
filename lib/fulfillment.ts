@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { costUsd } from "@/lib/credits";
+import { getSkillHandler } from "@/lib/skills";
 
 // Real fulfillment: Claude actually performs the listing's task against the
 // buyer's input, forced (via tool_choice) to return JSON conforming to the
@@ -12,6 +13,7 @@ type FulfillableListing = {
   description: string;
   details: string | null;
   outputSchema: unknown;
+  handler?: string | null;
 };
 
 export type FulfillmentUsage = { inputTokens: number; outputTokens: number; costUsd: number };
@@ -29,6 +31,13 @@ export async function fulfillWithUsage(
   listing: FulfillableListing,
   input: Record<string, unknown>
 ): Promise<{ output: Record<string, unknown>; usage: FulfillmentUsage }> {
+  // Code-backed skill: the result comes from a real lookup, not the model, so there is no token cost.
+  if (listing.handler) {
+    const skill = getSkillHandler(listing.handler);
+    if (!skill) throw new Error(`no handler registered for "${listing.handler}"`);
+    return { output: await skill.run(input), usage: { inputTokens: 0, outputTokens: 0, costUsd: 0 } };
+  }
+
   if (!FULFILLMENT_CONFIGURED) {
     throw new Error(
       "Fulfillment isn't configured — set ANTHROPIC_API_KEY in .env so purchased listings can actually be performed."

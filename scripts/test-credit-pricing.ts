@@ -37,11 +37,17 @@ async function main() {
   // --- every listing ---
   const listings = await db.listing.findMany({
     where: { active: true },
-    select: { id: true, name: true, priceSats: true, details: true, description: true, inputSchema: true, outputSchema: true },
+    select: { id: true, name: true, priceSats: true, details: true, description: true, inputSchema: true, outputSchema: true, handler: true },
   });
   assert.ok(listings.length > 100);
   for (const l of listings) {
     const b = creditBreakdown(l);
+    if (l.handler && l.priceSats === 0) {
+      assert.equal(b.credits, 0, `${l.name}: a free skill must cost 0 credits`);
+      assert.equal(priceCredits(l), 0);
+      assert.equal(priceCreditsLite(l.id, 0), 0);
+      continue;
+    }
     assert.ok(snapshotHasListing(l.id), `${l.name} missing from credit-prices.json`);
     assert.equal(priceCredits(l), b.credits, `${l.name}: snapshot differs from the formula (regenerate?)`);
     assert.equal(priceCreditsLite(l.id, l.priceSats), b.credits);

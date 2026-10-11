@@ -18,7 +18,11 @@
     "test:abuse": "tsx scripts/test-abuse-limits.ts",
     "catalog:check": "tsx scripts/catalog-check.ts",
     "catalog:run": "tsx scripts/catalog-run.ts",
-    "catalog:build": "tsx scripts/catalog-build.ts"
+    "catalog:build": "tsx scripts/catalog-build.ts",
+    "catalog:apply": "tsx scripts/catalog-apply.ts",
+    "test:free-skills": "tsx scripts/test-free-skills.ts",
+    "test:safe-fetch": "tsx scripts/test-safe-fetch.ts",
+    "catalog:skills": "tsx scripts/add-catalog-skills.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -31,6 +35,7 @@
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "bcryptjs": "^3.0.3",
+    "cheerio": "1.0.0",
     "geist": "^1.7.2",
     "lucide-react": "^1.47.0",
     "next": "16.3.5",

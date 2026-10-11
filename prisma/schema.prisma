@@ -87,6 +87,9 @@ model Listing {
   inputSchema  Json
   outputSchema Json
   priceSats    Int
+  // Set for code-backed skills: the key in lib/skills/index.ts that performs the lookup. Null for
+  // listings the model fulfills (lib/fulfillment.ts).
+  handler      String?  @unique
   active       Boolean  @default(true)
   successRate  Float    @default(1.0)
   avgLatencyMs Int      @default(0)

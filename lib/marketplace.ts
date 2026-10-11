@@ -13,7 +13,9 @@ import { keyPauseStatus, notifyKeyPaused } from "@/lib/abuse";
 import { limitByClient, rateLimit } from "@/lib/rate-limit";
 import { REAL_COMPLETED_WHERE } from "@/lib/reputation";
 import { inputTooLarge } from "@/lib/credits";
-import { RETRY_HASH_PREFIX, TRIAL_HASH_PREFIX, isCompleted, isFreeHash, isPending } from "@/lib/order-status";
+import { claimFreeSkillRun } from "@/lib/free-skills";
+import { getSkillHandler, SkillInputError } from "@/lib/skills";
+import { FREE_SKILL_HASH_PREFIX, RETRY_HASH_PREFIX, TRIAL_HASH_PREFIX, isCompleted, isFreeHash, isPending } from "@/lib/order-status";
 
 export class MarketplaceError extends Error {
   constructor(
@@ -97,7 +99,8 @@ export async function createOrder(
   listingId: string,
   input: Record<string, unknown>,
   agentWalletConnection?: string,
-  retryToken?: string
+  retryToken?: string,
+  ctx?: { headers?: { get(name: string): string | null } }
 ) {
   const operator = await getOperatorByApiKey(apiKey);
 
@@ -137,6 +140,44 @@ export async function createOrder(
   // arrays, so without this a single order could send ~200K tokens to the model.
   const tooLarge = inputTooLarge(input);
   if (tooLarge) throw new MarketplaceError(tooLarge, 413);
+
+  // Code-backed skills check their own input before anything runs (no outside call, no order, on bad input).
+  const skill = listing.handler ? getSkillHandler(listing.handler) : null;
+  if (listing.handler && !skill) throw new MarketplaceError("this skill is temporarily unavailable", 503);
+  if (skill?.validate) {
+    try {
+      skill.validate(input);
+    } catch (err) {
+      if (err instanceof SkillInputError) throw new MarketplaceError(err.message, 422);
+      throw err;
+    }
+  }
+
+  // Free skills: no payment, no trial; limited per account / per IP and globally (lib/free-skills.ts).
+  if (listing.handler && listing.priceSats === 0) {
+    const denied = await claimFreeSkillRun(operator, listing.handler, ctx?.headers);
+    if (denied) throw new MarketplaceError(denied.message, denied.status, denied.retryAfterSec);
+    const freeOrder = await db.order.create({
+      data: {
+        buyerId: operator.id,
+        sellerId: listing.sellerId,
+        listingId: listing.id,
+        input: input as Prisma.InputJsonValue,
+        amountSats: 0,
+        railInvoiceRef: "free-skill",
+        railPaymentHash: `${FREE_SKILL_HASH_PREFIX}${randomBytes(16).toString("hex")}`,
+        status: "pending",
+      },
+    });
+    await logAction(operator.id, "purchase", { orderId: freeOrder.id, listingId: listing.id, amountSats: 0, freeSkill: true });
+    return {
+      order_id: freeOrder.id,
+      amount_sats: 0,
+      free_skill: true as const,
+      invoice: null,
+      message: "This skill is free. Poll GET /api/v1/orders/{order_id} (or the check_order_status tool); the result runs on your first poll.",
+    };
+  }
 
   // Redeeming a retry token: one free call of the same listing after a failed check.
   if (retryToken) return redeemRetryToken(operator, listing, input, retryToken);
@@ -406,7 +447,7 @@ export async function getOrderStatus(orderId: string) {
       paidAt: new Date(),
     },
   });
-  await issueRetryToken(order.id);
+  if (!order.railPaymentHash.startsWith(FREE_SKILL_HASH_PREFIX)) await issueRetryToken(order.id);
   return db.order.findUniqueOrThrow({ where: { id: order.id }, include: { listing: true, seller: true } });
 }
 

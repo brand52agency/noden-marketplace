@@ -2,6 +2,7 @@
 // It relies on fulfillment NOT being configured locally (no ANTHROPIC_API_KEY), so every call fails
 // its check, which is exactly the path under test. It spends no API money and deletes what it creates.
 import assert from "node:assert/strict";
+import { sampleInput } from "./_sample-input";
 import { db } from "../lib/db";
 import { FULFILLMENT_CONFIGURED } from "../lib/fulfillment";
 import { MAX_RETRIES_PER_PAYMENT, createOrder, getOrderStatus, issueRetryToken } from "../lib/marketplace";
@@ -31,15 +32,7 @@ async function operator(suffix: string) {
   return { ...op, apiKey: key }; // plaintext, for the test only; the row holds just the hash
 }
 
-function validInput(schema: unknown): Record<string, unknown> {
-  const s = schema as { required?: string[]; properties?: Record<string, { type?: string; enum?: unknown[]; minLength?: number }> };
-  const out: Record<string, unknown> = {};
-  for (const k of s.required ?? []) {
-    const p = s.properties?.[k] ?? {};
-    out[k] = p.enum ? p.enum[0] : p.type === "number" || p.type === "integer" ? 1 : p.type === "boolean" ? true : p.type === "array" ? ["x"] : "x".repeat(Math.max(1, p.minLength ?? 1));
-  }
-  return out;
-}
+const validInput = sampleInput;
 
 async function expectError(promise: Promise<unknown>, status: number, label: string) {
   try {
@@ -53,11 +46,11 @@ async function expectError(promise: Promise<unknown>, status: number, label: str
 
 async function main() {
   const listing = await db.listing.findFirstOrThrow({
-    where: { active: true, priceSats: { lte: 150 } },
+    where: { active: true, handler: null, priceSats: { lte: 150 } },
     orderBy: { priceSats: "asc" },
     select: { id: true, inputSchema: true },
   });
-  const other = await db.listing.findFirstOrThrow({ where: { active: true, id: { not: listing.id }, priceSats: { lte: 150 } }, select: { id: true, inputSchema: true } });
+  const other = await db.listing.findFirstOrThrow({ where: { active: true, handler: null, id: { not: listing.id }, priceSats: { lte: 150 } }, select: { id: true, inputSchema: true } });
   const input = validInput(listing.inputSchema);
   const owner = await operator("owner");
   const thief = await operator("thief");
