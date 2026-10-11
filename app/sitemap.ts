@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
+import { promptCategories, publishedPrompts } from "@/lib/catalog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const listings = await db.listing.findMany({
@@ -20,5 +21,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  return [...staticRoutes, ...listingRoutes];
+  const prompts = publishedPrompts();
+  const promptRoutes: MetadataRoute.Sitemap = prompts.length
+    ? [
+        { url: "https://shop.getnoden.com/prompts", changeFrequency: "weekly", priority: 0.7 },
+        ...promptCategories().map((c) => ({ url: `https://shop.getnoden.com/prompts/${c.slug}`, changeFrequency: "weekly" as const, priority: 0.6 })),
+        ...prompts.map((p) => ({ url: `https://shop.getnoden.com/prompts/${p.slug}`, changeFrequency: "monthly" as const, priority: 0.6 })),
+      ]
+    : [];
+
+  return [...staticRoutes, ...listingRoutes, ...promptRoutes];
 }

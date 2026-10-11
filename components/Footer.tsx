@@ -1,6 +1,7 @@
 import Logo from "./Logo";
+import { publishedPrompts } from "@/lib/catalog";
 
-const columns = [
+const baseColumns = [
   { title: "Product", links: [
     { label: "Features", href: "https://getnoden.com/features" },
     { label: "Pricing", href: "https://getnoden.com/pricing" },
@@ -23,6 +24,11 @@ const columns = [
 ];
 
 export function Footer() {
+  // The prompt library only appears once something in it is published.
+  const hasPrompts = publishedPrompts().length > 0;
+  const columns = baseColumns.map((c) =>
+    c.title === "Resources" && hasPrompts ? { ...c, links: [{ label: "Free prompts", href: "/prompts" }, ...c.links] } : c,
+  );
   return (
     <footer className="mt-24">
       <div className="mx-auto max-w-[1600px] px-4 pb-10 sm:px-[30px]">
