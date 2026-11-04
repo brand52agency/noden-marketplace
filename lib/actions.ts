@@ -63,8 +63,11 @@ export async function loginAction(_prev: ActionState, formData: FormData): Promi
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
 
+  // Go back to the page they came from, but only to a path on this site (never an outside address).
+  const from = String(formData.get("from") ?? "");
+  const redirectTo = /^\/(?![/\\])/.test(from) ? from : "/operator/dashboard";
   try {
-    await signIn("credentials", { email, password, redirectTo: "/operator/dashboard" });
+    await signIn("credentials", { email, password, redirectTo });
   } catch (err) {
     if (err && typeof err === "object" && "type" in err) {
       return { error: "Incorrect email or password." };

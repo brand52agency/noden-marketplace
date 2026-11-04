@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { db } from "@/lib/db";
+import { KITS } from "@/lib/kits";
 import { promptCategories, publishedPrompts } from "@/lib/catalog";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -11,6 +12,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: "https://shop.getnoden.com/", changeFrequency: "hourly", priority: 1 },
     { url: "https://shop.getnoden.com/signup", changeFrequency: "monthly", priority: 0.6 },
+    { url: "https://shop.getnoden.com/kits", changeFrequency: "weekly", priority: 0.7 },
+    ...KITS.map((k) => ({ url: `https://shop.getnoden.com/kits/${k.id}`, changeFrequency: "weekly" as const, priority: 0.6 })),
     { url: "https://shop.getnoden.com/login", changeFrequency: "yearly", priority: 0.2 },
   ];
 

@@ -23,7 +23,8 @@
     "test:free-skills": "tsx scripts/test-free-skills.ts",
     "test:safe-fetch": "tsx scripts/test-safe-fetch.ts",
     "catalog:skills": "tsx scripts/add-catalog-skills.ts",
-    "test:mcp-key": "tsx scripts/test-mcp-header-key.ts"
+    "test:mcp-key": "tsx scripts/test-mcp-header-key.ts",
+    "test:kits": "tsx scripts/test-kits.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

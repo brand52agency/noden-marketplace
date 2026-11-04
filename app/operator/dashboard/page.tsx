@@ -64,6 +64,9 @@ export default async function DashboardPage() {
         <Link href="/operator/credits" className="mt-3 inline-block text-sm text-accent hover:underline">
           Buy credits or see activity →
         </Link>
+        <Link href="/operator/kits" className="mt-3 ml-5 inline-block text-sm text-accent hover:underline">
+          My kits →
+        </Link>
       </section>
 
       <section className="mt-6 rounded-lg bg-surface p-5 border border-border">

@@ -44,6 +44,7 @@ model Operator {
   createdAt          DateTime @default(now())
 
   creditEntries CreditEntry[]
+  kitClaims     KitClaim[]
   purchases     Purchase[]
   allowlist SellerAllowlistEntry[]
   listings  Listing[]
@@ -215,4 +216,17 @@ model Purchase {
   paidAt                DateTime?
 
   @@index([operatorId, createdAt])
+}
+
+// An account's ownership of an agent kit (lib/kits.ts). Free kits are claimed with one click while signed in;
+// paid kits will be added by the Stripe webhook with source "purchase". One row per account per kit.
+model KitClaim {
+  id         String   @id @default(cuid())
+  operatorId String
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  kitId      String
+  source     String   @default("free") // "free" | "purchase" | "grant"
+  createdAt  DateTime @default(now())
+
+  @@unique([operatorId, kitId])
 }

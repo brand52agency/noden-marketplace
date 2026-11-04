@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
-export function CopyPromptButton({ text }: { text: string }) {
+export function CopyPromptButton({ text, label = "Copy prompt" }: { text: string; label?: string }) {
   const [copied, setCopied] = useState(false);
   return (
     <button
@@ -20,7 +20,7 @@ export function CopyPromptButton({ text }: { text: string }) {
       className="inline-flex items-center gap-2 rounded-xl bg-ink px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#3a343a]"
     >
       {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-      {copied ? "Copied" : "Copy prompt"}
+      {copied ? "Copied" : label}
     </button>
   );
 }
