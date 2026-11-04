@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 // operator account is for — only the actual account pages underneath
 // it require login. /marketplace is fully public (agents and humans
 // browse without an account).
-const PROTECTED_OPERATOR_PREFIXES = ["/operator/setup", "/operator/dashboard", "/operator/audit-log"];
+const PROTECTED_OPERATOR_PREFIXES = ["/operator/setup", "/operator/dashboard", "/operator/audit-log", "/operator/credits"];
 
 export default auth((req) => {
   const { pathname } = req.nextUrl;

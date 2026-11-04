@@ -10,7 +10,7 @@
     "postinstall": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "credits:generate": "tsx scripts/generate-credit-prices.ts",
-    "test:credits": "tsx scripts/test-credit-pricing.ts",
+    "test:credits": "tsx scripts/test-credits.ts",
     "test:orders": "tsx scripts/test-order-view.ts",
     "test:retries": "tsx scripts/test-retry-tokens.ts",
     "migrate:order-states": "tsx scripts/migrate-order-states.ts",
@@ -46,6 +46,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "resend": "^6.29.0",
+    "stripe": "^23.1.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {

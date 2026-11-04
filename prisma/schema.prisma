@@ -35,8 +35,16 @@ model Operator {
   apiKeyHash         String?  @unique
   apiKeyPrefix       String? // first characters of the key, so people can tell their keys apart
   apiKeyCreatedAt    DateTime?
+  // Prepaid credits (1 credit = $0.01). Only ever changed through lib/billing/ledger.ts, which writes a
+  // CreditEntry for every change; the balance is never edited directly.
+  creditBalance      Int      @default(0)
+  stripeCustomerId   String?  @unique
+  // Set when a payment is disputed/charged back: credits can't be spent or bought until an admin clears it.
+  billingHoldAt      DateTime?
   createdAt          DateTime @default(now())
 
+  creditEntries CreditEntry[]
+  purchases     Purchase[]
   allowlist SellerAllowlistEntry[]
   listings  Listing[]
   orders    Order[]        @relation("BuyerOrders")
@@ -128,6 +136,10 @@ model Order {
   retryTokenUsedAt    DateTime?
   retryOfOrderId      String?
   retryDepth          Int       @default(0)
+
+  // Set when the order was paid from the buyer's credit balance (railPaymentHash starts with "credit_").
+  // amountSats still holds the listing's sats-equivalent price so reputation and volume stats keep working.
+  amountCredits       Int       @default(0)
 }
 
 model AuditLogEntry {
@@ -166,4 +178,41 @@ model RateLimitHit {
   createdAt DateTime @default(now())
 
   @@index([bucket, createdAt])
+}
+
+// Append-only record of every change to Operator.creditBalance. `ref` is a unique idempotency key
+// ("purchase:<stripe session>", "spend:<order id>", "clawback:<charge>"), so replaying a webhook or
+// a request can never apply the same change twice.
+model CreditEntry {
+  id           String   @id @default(cuid())
+  operatorId   String
+  operator     Operator @relation(fields: [operatorId], references: [id])
+  delta        Int // + grants, - spends
+  balanceAfter Int
+  kind         String // "purchase" | "spend" | "clawback" | "grant" | "adjustment"
+  ref          String?  @unique
+  note         String?
+  createdAt    DateTime @default(now())
+
+  @@index([operatorId, createdAt])
+}
+
+// One row per Stripe Checkout Session we start. Credits are granted only when Stripe confirms payment
+// (lib/billing/fulfil.ts), never when the buyer returns to the site.
+model Purchase {
+  id                    String    @id @default(cuid())
+  operatorId            String
+  operator              Operator  @relation(fields: [operatorId], references: [id])
+  sku                   String // key in lib/billing/catalog.ts, e.g. "topup-5000"
+  credits               Int
+  amountCents           Int
+  currency              String    @default("usd")
+  stripeSessionId       String    @unique
+  stripePaymentIntentId String?   @unique
+  status                String    @default("pending") // "pending" | "paid" | "refunded" | "disputed" | "expired"
+  creditsClawedBack     Int       @default(0)
+  createdAt             DateTime  @default(now())
+  paidAt                DateTime?
+
+  @@index([operatorId, createdAt])
 }
