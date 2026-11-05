@@ -20,4 +20,7 @@ export function webhookSecret(): string {
   return s;
 }
 
-export const siteUrl = () => (process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXTAUTH_URL ?? "https://shop.getnoden.com").replace(/\/$/, "");
+// Where Stripe sends buyers back to. In production this is always the real shop address (NEXTAUTH_URL may
+// still hold an old domain); locally it follows NEXTAUTH_URL so test purchases return to localhost.
+export const siteUrl = () =>
+  (process.env.NEXT_PUBLIC_SITE_URL ?? (process.env.NODE_ENV === "production" ? "https://shop.getnoden.com" : (process.env.NEXTAUTH_URL ?? "http://localhost:3200"))).replace(/\/$/, "");
