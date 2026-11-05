@@ -29,6 +29,16 @@ export async function fulfilCheckoutSession(session: Stripe.Checkout.Session): P
   }
   if (session.payment_status !== "paid") return "ignored"; // async methods: wait for async_payment_succeeded
 
+  // A test-mode payment moves no real money, so it must never produce spendable credits for a normal account.
+  // Only admin accounts (the owner, testing) may receive credits from test-mode payments.
+  if (session.livemode === false) {
+    const buyer = await db.operator.findUnique({ where: { id: purchase.operatorId }, select: { role: true } });
+    if (buyer?.role !== "admin") {
+      await logAction(purchase.operatorId, "purchase", { billing: "test_mode_ignored", session: session.id });
+      return "ignored";
+    }
+  }
+
   // Credits come from OUR row, and the amount Stripe charged (before tax) must match it.
   if (session.amount_subtotal !== purchase.amountCents || (session.currency ?? "usd") !== purchase.currency) {
     await logAction(purchase.operatorId, "purchase", {

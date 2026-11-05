@@ -25,7 +25,8 @@ export default async function CreditsPage({ searchParams }: { searchParams: Prom
     db.purchase.findMany({ where: { operatorId: operator.id, status: { not: "pending" } }, orderBy: { createdAt: "desc" }, take: 10 }),
   ]);
 
-  const enabled = billingEnabled();
+  // In Stripe test mode the buy buttons are for admin accounts only, so nobody else can get free test credits.
+  const enabled = billingEnabled() && (!isTestMode() || operator.role === "admin");
   const error = params.error ? (ERRORS[params.error] ?? ERRORS.unavailable) : null;
 
   return (

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { rateLimit } from "@/lib/rate-limit";
 import { billingEnabled, getSku } from "@/lib/billing/catalog";
-import { getStripe, siteUrl } from "@/lib/billing/stripe";
+import { getStripe, isTestMode, siteUrl } from "@/lib/billing/stripe";
 
 // Starts a Stripe Checkout for one credit pack. The price comes from lib/billing/catalog.ts, never from the form.
 export async function POST(request: NextRequest) {
@@ -19,6 +19,8 @@ export async function POST(request: NextRequest) {
 
   const operator = await db.operator.findUnique({ where: { id: session.user.id } });
   if (!operator) return back("unavailable");
+  // In Stripe test mode, only admin accounts can start a checkout (see the matching guard in lib/billing/fulfil.ts).
+  if (isTestMode() && operator.role !== "admin") return back("unavailable");
   if (!operator.emailVerifiedAt) return back("verify_email");
   if (operator.billingHoldAt) return back("hold");
 
