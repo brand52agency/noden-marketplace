@@ -7,7 +7,7 @@ import { db } from "../lib/db";
 import { apiKeyFields, generateApiKey } from "../lib/api-key";
 import { createOrder, MarketplaceError } from "../lib/marketplace";
 import { priceCredits } from "../lib/credits";
-import { grantCredits, once } from "../lib/billing/ledger";
+import { clawBackCredits, grantCredits, once } from "../lib/billing/ledger";
 import { fulfilCheckoutSession, handleDispute, handleRefund } from "../lib/billing/fulfil";
 import { getSku } from "../lib/billing/catalog";
 import { getStripe, webhookSecret } from "../lib/billing/stripe";
@@ -92,6 +92,19 @@ async function main() {
     const lost = `cs_test_${tag}_lost`;
     const rebuilt = await fulfilCheckoutSession(fakeSession(lost, b.op.id, sku.id));
     check("a session whose Purchase row was lost is rebuilt from the catalog", rebuilt === "granted" && (await balanceOf(b.op.id)) === 2000);
+
+    // A test-mode payment grants credits to an admin only, never to a normal account.
+    const tm = `cs_test_${tag}_tm`;
+    await db.purchase.create({ data: { operatorId: b.op.id, sku: sku.id, credits: sku.credits, amountCents: sku.amountCents, stripeSessionId: tm } });
+    const beforeTm = await balanceOf(b.op.id);
+    const tmUser = await fulfilCheckoutSession(fakeSession(tm, b.op.id, sku.id, { livemode: false }));
+    check("a test-mode payment grants a normal account nothing", tmUser === "ignored" && (await balanceOf(b.op.id)) === beforeTm);
+    await db.operator.update({ where: { id: b.op.id }, data: { role: "admin" } });
+    const tmAdmin = await fulfilCheckoutSession(fakeSession(tm, b.op.id, sku.id, { livemode: false }));
+    check("a test-mode payment grants an admin account its credits", tmAdmin === "granted" && (await balanceOf(b.op.id)) === beforeTm + 1000);
+    await db.operator.update({ where: { id: b.op.id }, data: { role: "buyer" } });
+    await once(async (tx) => { await clawBackCredits(tx, b.op.id, 1000, `test:${tag}:undo-tm`); });
+    await db.purchase.update({ where: { stripeSessionId: tm }, data: { creditsClawedBack: 1000 } });
 
     // ---- 4. Refund and dispute ----
     const pi = `pi_${sid}`;
