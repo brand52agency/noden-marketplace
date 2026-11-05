@@ -1,14 +1,19 @@
 import Logo from "./Logo";
 import { publishedPrompts } from "@/lib/catalog";
 
+// KEEP IN SYNC with agentix/components/Footer.tsx (the marketing site): same columns, same links.
 const baseColumns = [
   { title: "Product", links: [
     { label: "Features", href: "https://getnoden.com/features" },
     { label: "Pricing", href: "https://getnoden.com/pricing" },
+    { label: "Use cases", href: "https://getnoden.com/use-cases" },
     { label: "Connect your agent", href: "https://getnoden.com/connect" },
+    { label: "Get an agent", href: "https://getnoden.com/get-an-agent" },
+    { label: "Meet the agents", href: "https://getnoden.com/meet-the-agents" },
   ] },
   { title: "Marketplace", links: [
     { label: "Browse skills", href: "/" },
+    { label: "Agent kits", href: "/kits" },
     { label: "Sign in", href: "/login" },
     { label: "Start free", href: "/signup" },
   ] },
@@ -16,6 +21,10 @@ const baseColumns = [
     { label: "Blog", href: "https://getnoden.com/blog" },
     { label: "FAQs", href: "https://getnoden.com/resources" },
     { label: "llms.txt", href: "/llms.txt" },
+  ] },
+  { title: "Sell", links: [
+    { label: "Sell on Noden", href: "https://getnoden.com/sell" },
+    { label: "Early access", href: "https://getnoden.com/early-access" },
   ] },
   { title: "Legal", links: [
     { label: "Privacy policy", href: "https://getnoden.com/privacy" },
@@ -32,7 +41,7 @@ export function Footer() {
   return (
     <footer className="mt-24">
       <div className="mx-auto max-w-[1600px] px-4 pb-10 sm:px-[30px]">
-        <div className="grid grid-cols-2 gap-10 lg:grid-cols-[1.4fr_repeat(4,1fr)]">
+        <div className="grid grid-cols-2 gap-10 lg:grid-cols-[1.4fr_repeat(5,1fr)]">
           <div className="col-span-2 lg:col-span-1">
             <Logo height={36} className="h-9 w-auto" />
             <p className="mt-4 max-w-[240px] text-sm text-ink-secondary">

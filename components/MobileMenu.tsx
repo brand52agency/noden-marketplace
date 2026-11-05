@@ -30,7 +30,7 @@ export function MobileMenu({
 
   const drawer = (
     <div
-      className={`fixed inset-0 z-[60] lg:hidden ${open ? "pointer-events-auto" : "pointer-events-none"}`}
+      className={`fixed inset-0 z-[60] xl:hidden ${open ? "pointer-events-auto" : "pointer-events-none"}`}
       aria-hidden={!open}
     >
       <div
@@ -75,7 +75,7 @@ export function MobileMenu({
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open menu"
-        className="flex items-center justify-center rounded-full border border-border p-2 text-ink lg:hidden"
+        className="flex items-center justify-center rounded-full border border-border p-2 text-ink xl:hidden"
       >
         <Menu className="h-5 w-5" />
       </button>
