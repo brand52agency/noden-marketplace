@@ -4,14 +4,18 @@ import { logoutAction } from "@/lib/actions";
 import Logo from "./Logo";
 import { MobileMenu } from "./MobileMenu";
 
-// Same primary nav as getnoden.com. "Docs" points at the agent setup
+// Same primary nav as getnoden.com, link for link and in the same order. "Docs" points at the agent setup
 // instructions until a full docs section exists.
+// KEEP IN SYNC with agentix/components/Nav.tsx (the marketing site). "Get an agent" and "Learn" are shown there
+// only while their publish flags are on; both are on today, so they are always listed here.
 const links = [
   { label: "Product", href: "https://getnoden.com/features" },
   { label: "Marketplace", href: "/" },
   { label: "Kits", href: "/kits" },
   { label: "Pricing", href: "https://getnoden.com/pricing" },
   { label: "Docs", href: "https://getnoden.com/connect" },
+  { label: "Get an agent", href: "https://getnoden.com/get-an-agent" },
+  { label: "Learn", href: "https://getnoden.com/meet-the-agents" },
   { label: "Blog", href: "https://getnoden.com/blog" },
   { label: "Sell", href: "https://getnoden.com/sell" },
 ];
@@ -37,19 +41,19 @@ export default async function Nav() {
           <Logo height={32} className="h-8 w-auto" />
         </a>
 
-        <nav className="hidden items-center gap-7 text-[14px] text-ink lg:flex">
+        <nav className="hidden items-center gap-6 text-[14px] text-ink xl:flex">
           {links.map((l) => (
-            <a key={l.label} href={l.href} className="transition-opacity hover:opacity-60">
+            <a key={l.label} href={l.href} className="whitespace-nowrap transition-opacity hover:opacity-60">
               {l.label}
             </a>
           ))}
           {signedIn && (
-            <Link href="/operator/dashboard" className="transition-opacity hover:opacity-60">
+            <Link href="/operator/dashboard" className="whitespace-nowrap transition-opacity hover:opacity-60">
               Dashboard
             </Link>
           )}
           {session?.user?.role === "admin" && (
-            <Link href="/admin/overview" className="transition-opacity hover:opacity-60">Admin</Link>
+            <Link href="/admin/overview" className="whitespace-nowrap transition-opacity hover:opacity-60">Admin</Link>
           )}
         </nav>
 
@@ -62,7 +66,7 @@ export default async function Nav() {
             </form>
           ) : (
             <>
-              <Link href="/login" className={`hidden lg:inline-flex ${btnOutline}`}>
+              <Link href="/login" className={`hidden xl:inline-flex ${btnOutline}`}>
                 Sign in
               </Link>
               {/* Visible at every width, so the primary CTA never hides in the mobile drawer. */}
