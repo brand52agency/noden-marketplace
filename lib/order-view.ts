@@ -4,7 +4,7 @@
 // explicit whitelist. It must never be built by returning a database row: the order row joins the
 // seller and listing records, which hold the seller's API key and password hash, payout details
 // and the listing's prompt.
-import { isFreeHash, isPending, isFailed, normalizeOrderStatus } from "@/lib/order-status";
+import { isCreditHash, isFreeHash, isPending, isFailed, normalizeOrderStatus } from "@/lib/order-status";
 
 type OrderRow = {
   id: string;
@@ -46,7 +46,7 @@ export function presentOrder(order: OrderRow) {
     verificationResult: order.verificationResult,
     failureNote: order.failureNote,
     // The invoice is only useful while someone still needs to pay it.
-    invoice: isPending(order.status) && !isFreeHash(order.railPaymentHash) ? order.railInvoiceRef : undefined,
+    invoice: isPending(order.status) && !isFreeHash(order.railPaymentHash) && !isCreditHash(order.railPaymentHash) ? order.railInvoiceRef : undefined,
     // After a failed check: one free call of the same listing, for 24 hours.
     retryToken: tokenLive ? order.retryToken : undefined,
     retryTokenExpiresAt: tokenLive ? order.retryTokenExpiresAt : undefined,

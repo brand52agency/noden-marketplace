@@ -30,6 +30,9 @@ export const TRIAL_HASH_PREFIX = "trial_";
 export const RETRY_HASH_PREFIX = "retry_";
 // A run of a free (price 0) code-backed skill, see lib/free-skills.ts.
 export const FREE_SKILL_HASH_PREFIX = "freeskill_";
+// An order paid from the buyer's prepaid credit balance (lib/billing/ledger.ts).
+export const CREDIT_HASH_PREFIX = "credit_";
+export const isCreditHash = (hash: string) => hash.startsWith(CREDIT_HASH_PREFIX);
 export const isFreeHash = (hash: string) =>
   hash.startsWith(TRIAL_HASH_PREFIX) || hash.startsWith(RETRY_HASH_PREFIX) || hash.startsWith(FREE_SKILL_HASH_PREFIX);
 

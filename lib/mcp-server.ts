@@ -115,7 +115,8 @@ export function createMcpServer(ctx: { headers?: { get(name: string): string | n
     {
       description:
         "Purchase a skill. Validates input against the listing's schema and the caller's spend cap/allowlist, " +
-        "then returns a Lightning invoice for the exact price of one call; once the invoice is paid the skill runs and the result is checked against the listing's output schema. " +
+        "then, unless the account has enough prepaid credits (see below), returns a Lightning invoice for the exact price of one call; once the invoice is paid the skill runs and the result is checked against the listing's output schema. " +
+        "If the account has enough prepaid credits for the call, they are used automatically: the response has paid_with_credits true, credits_charged and credits_remaining, and no invoice — just poll check_order_status. " +
         "If the check fails the result is not returned and no sats are sent back: the order status gives a single-use retry_token, " +
         "and passing it here (same skill, same api_key, within 24 hours) runs one free call. " +
         "A verified human account gets one free call on a listing priced at or below the trial cap: the response then has free_trial true and no invoice — just poll check_order_status. Every other purchase returns a Lightning invoice. " +

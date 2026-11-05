@@ -1,12 +1,22 @@
 "use client";
 
-import { useActionState } from "react";
+import { Suspense, useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { loginAction } from "@/lib/actions";
 import { MoneyGrid } from "@/components/MoneyGrid";
 
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginView />
+    </Suspense>
+  );
+}
+
+function LoginView() {
   const [state, formAction, pending] = useActionState(loginAction, null);
+  const from = useSearchParams().get("from") ?? "";
 
   return (
     <main className="relative flex flex-1 items-center justify-center overflow-hidden px-6 py-16">
@@ -29,6 +39,7 @@ export default function LoginPage() {
           action={formAction}
           className="mt-8 flex flex-col gap-4 rounded-2xl border border-border bg-surface p-8"
         >
+          <input type="hidden" name="from" value={from} />
           <div>
             <label className="font-mono text-xs text-ink-secondary" htmlFor="email">Email</label>
             <input

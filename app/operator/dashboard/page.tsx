@@ -57,6 +57,19 @@ export default async function DashboardPage() {
       )}
 
       <section className="mt-8 rounded-lg bg-surface p-5 border border-border">
+        <p className="text-xs uppercase tracking-wider text-ink-tertiary">Credits</p>
+        <p className="mt-1 text-2xl font-mono text-ink">
+          {operator.creditBalance.toLocaleString()} <span className="text-sm text-ink-tertiary">credits</span>
+        </p>
+        <Link href="/operator/credits" className="mt-3 inline-block text-sm text-accent hover:underline">
+          Buy credits or see activity →
+        </Link>
+        <Link href="/operator/kits" className="mt-3 ml-5 inline-block text-sm text-accent hover:underline">
+          My kits →
+        </Link>
+      </section>
+
+      <section className="mt-6 rounded-lg bg-surface p-5 border border-border">
         <p className="text-xs uppercase tracking-wider text-ink-tertiary">Spend cap — today</p>
         <p className="mt-1 text-2xl font-mono text-ink">
           {operator.spendUsedTodaySats.toLocaleString()}{" "}

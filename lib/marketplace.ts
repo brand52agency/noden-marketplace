@@ -15,7 +15,10 @@ import { REAL_COMPLETED_WHERE } from "@/lib/reputation";
 import { inputTooLarge } from "@/lib/credits";
 import { claimFreeSkillRun } from "@/lib/free-skills";
 import { getSkillHandler, SkillInputError } from "@/lib/skills";
-import { FREE_SKILL_HASH_PREFIX, RETRY_HASH_PREFIX, TRIAL_HASH_PREFIX, isCompleted, isFreeHash, isPending } from "@/lib/order-status";
+import { CREDIT_HASH_PREFIX, FREE_SKILL_HASH_PREFIX, RETRY_HASH_PREFIX, TRIAL_HASH_PREFIX, isCompleted, isCreditHash, isFreeHash, isPending } from "@/lib/order-status";
+import { priceCredits } from "@/lib/credits";
+import { InsufficientCredits, spendCredits } from "@/lib/billing/ledger";
+import { newBuyerLimitMessage } from "@/lib/billing/limits";
 
 export class MarketplaceError extends Error {
   constructor(
@@ -213,9 +216,15 @@ export async function createOrder(
     };
   }
 
+  // Prepaid credits come first: if the balance covers the price, pay from it (no invoice, no spend cap).
+  const creditPrice = priceCredits(listing);
+  if (creditPrice > 0 && operator.creditBalance >= creditPrice && !operator.billingHoldAt) {
+    return payWithCredits(operator, listing, creditPrice, input);
+  }
+
   if (operator.spendCapDailySats <= 0) {
     throw new MarketplaceError(
-      "you don't have access yet — no spend cap is set. Ask your operator to configure one at https://shop.getnoden.com/operator/setup",
+      "you don't have access yet — no credits and no spend cap. Ask your operator to buy credits at https://shop.getnoden.com/operator/credits, or set a Lightning spend cap at https://shop.getnoden.com/operator/setup",
       403
     );
   }
@@ -276,6 +285,57 @@ export async function createOrder(
     expires_at: paymentRequest.expiresAt,
     ...(walletPaymentRequested !== undefined && { wallet_payment_requested: walletPaymentRequested }),
     ...(walletPaymentError && { wallet_payment_error: walletPaymentError }),
+  };
+}
+
+
+// Pays for one call from the credit balance. The order and the ledger spend are one transaction: either
+// both exist or neither does, and the conditional decrement in spendCredits stops two simultaneous calls
+// from spending the same credits.
+async function payWithCredits(
+  operator: { id: string },
+  listing: { id: string; sellerId: string; priceSats: number },
+  credits: number,
+  input: Record<string, unknown>
+) {
+  const limited = await newBuyerLimitMessage(operator.id, credits);
+  if (limited) throw new MarketplaceError(limited, 429);
+
+  let result: { orderId: string; balance: number };
+  try {
+    result = await db.$transaction(async (tx) => {
+      const created = await tx.order.create({
+        data: {
+          buyerId: operator.id,
+          sellerId: listing.sellerId,
+          listingId: listing.id,
+          input: input as Prisma.InputJsonValue,
+          amountSats: listing.priceSats,
+          amountCredits: credits,
+          railInvoiceRef: "credits",
+          railPaymentHash: `${CREDIT_HASH_PREFIX}${randomBytes(16).toString("hex")}`,
+          status: "pending",
+        },
+      });
+      const balance = await spendCredits(tx, operator.id, credits, `spend:${created.id}`, `order ${created.id}`);
+      return { orderId: created.id, balance };
+    });
+  } catch (err) {
+    if (err instanceof InsufficientCredits) {
+      throw new MarketplaceError("not enough credits for this call — top up at https://shop.getnoden.com/operator/credits", 402);
+    }
+    throw err;
+  }
+  await logAction(operator.id, "purchase", { orderId: result.orderId, listingId: listing.id, credits, paidWith: "credits" });
+  return {
+    order_id: result.orderId,
+    amount_sats: 0,
+    paid_with_credits: true as const,
+    credits_charged: credits,
+    credits_remaining: result.balance,
+    invoice: null,
+    message:
+      "Paid from your credit balance. Poll GET /api/v1/orders/{order_id} (or the check_order_status tool); the result runs on your first poll.",
   };
 }
 
@@ -365,7 +425,8 @@ export async function getOrderStatus(orderId: string) {
   }
 
   const isFree = isFreeHash(order.railPaymentHash);
-  const payStatus = isFree ? "paid" : await paymentRail.checkStatus(order.railPaymentHash);
+  const isCredit = isCreditHash(order.railPaymentHash);
+  const payStatus = isFree || isCredit ? "paid" : await paymentRail.checkStatus(order.railPaymentHash);
   if (payStatus !== "paid") {
     return order;
   }
@@ -402,7 +463,7 @@ export async function getOrderStatus(orderId: string) {
   await logAction(order.buyerId, "verification", { orderId: order.id, pass: verification.valid });
 
   if (verification.valid) {
-    const payoutDestination = isFree ? null : (order.seller.payoutLightningAddress ?? order.seller.nwcConnection);
+    const payoutDestination = isFree || isCredit ? null : (order.seller.payoutLightningAddress ?? order.seller.nwcConnection);
     // With no external payout destination — true today, since Noden is the only seller and hasn't
     // registered a payout address for itself — the full amount stays in Noden's own wallet, so all
     // of it is platform revenue. The 2.5% split only applies once there's a third-party seller.
